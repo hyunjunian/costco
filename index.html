@@ -145,7 +145,7 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 18px;
     }
@@ -582,10 +582,9 @@
     </section>
 
     <section class="stats" aria-label="요약">
-      <div class="stat"><span>상품</span><strong id="productCount">0</strong></div>
-      <div class="stat"><span>재고 있음</span><strong id="stockCount">0</strong></div>
-      <div class="stat"><span>가격 있음</span><strong id="priceCount">0</strong></div>
-      <div class="stat"><span>기준가 대비 할인</span><strong id="discountCount">0</strong></div>
+      <div class="stat"><span>전체</span><strong id="productCount">0</strong></div>
+      <div class="stat"><span>판매 중</span><strong id="stockCount">0</strong></div>
+      <div class="stat"><span>할인 중</span><strong id="discountCount">0</strong></div>
     </section>
 
     <div class="status" id="status"><span class="spinner"></span><span>products, prices, basePrices를 가져오고 있습니다.</span></div>
@@ -690,7 +689,6 @@
       empty: document.getElementById("empty"),
       productCount: document.getElementById("productCount"),
       stockCount: document.getElementById("stockCount"),
-      priceCount: document.getElementById("priceCount"),
       discountCount: document.getElementById("discountCount"),
       searchInput: document.getElementById("searchInput"),
       stockFilter: document.getElementById("stockFilter"),
@@ -950,8 +948,7 @@
       const rows = state.rows;
       els.productCount.textContent = numberFormatter.format(rows.length);
       els.stockCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock).length);
-      els.priceCount.textContent = numberFormatter.format(rows.filter((row) => row.price !== null).length);
-      els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.delta !== null && row.delta < 0).length);
+      els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock && row.delta !== null && row.delta < 0).length);
     }
 
     function applyFilters() {
