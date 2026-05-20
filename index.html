@@ -1049,8 +1049,18 @@
     function setSort(key, dir, shouldUpdateUrl) {
       const previousKey = state.sortKey;
       const previousDir = state.sortDir;
-      state.sortKey = key;
-      state.sortDir = dir || (previousKey === key ? (previousDir === "asc" ? "desc" : "asc") : defaultSortDir(key));
+      if (dir) {
+        state.sortKey = key;
+        state.sortDir = dir;
+      } else if (previousKey !== key) {
+        state.sortKey = key;
+        state.sortDir = "desc";
+      } else if (previousDir === "desc") {
+        state.sortDir = "asc";
+      } else {
+        state.sortKey = "priceTimestamp";
+        state.sortDir = "desc";
+      }
       state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
       if (shouldUpdateUrl !== false) updateUrlState();
