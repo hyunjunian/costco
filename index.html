@@ -342,8 +342,26 @@
       overflow-wrap: anywhere;
     }
 
-    .code {
+    .product-text {
+      min-width: 0;
+    }
+
+    .code-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
       margin-top: 2px;
+    }
+
+    .code-row .chip {
+      min-height: 18px;
+      padding: 0 6px;
+      font-size: 11px;
+      line-height: 18px;
+    }
+
+    .code {
       color: var(--muted);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 12px;
@@ -353,6 +371,14 @@
       text-align: right;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
+    }
+
+    .subtext {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: normal;
     }
 
     .chip {
@@ -497,22 +523,6 @@
       padding: 10px 14px;
     }
 
-    .pager {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .pager-controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
     .empty {
       padding: 52px 16px;
       text-align: center;
@@ -540,18 +550,6 @@
         padding: 12px;
       }
 
-      .pager {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .pager-controls {
-        width: 100%;
-      }
-
-      .pager-controls button {
-        flex: 1;
-      }
     }
   </style>
 </head>
@@ -597,7 +595,6 @@
             <th class="num"><button class="sort-button" type="button" data-sort-key="basePrice">기준가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
-            <th><button class="sort-button" type="button" data-sort-key="stock">품절 여부</button></th>
             <th>이력</th>
           </tr>
         </thead>
@@ -606,7 +603,6 @@
       <div class="empty" id="empty" hidden>조건에 맞는 상품이 없습니다.</div>
     </section>
 
-    <div class="pager" id="pageInfo">0개</div>
   </main>
 
   <div class="modal" id="historyModal" hidden>
@@ -668,7 +664,7 @@
       basePriceHistory: new Map(),
       visibleCount: 20,
       viewFilter: "in",
-      sortKey: "discountRate",
+      sortKey: "priceTimestamp",
       sortDir: "desc",
       defaultMaxPrice: 0,
       restoredHistoryCode: "",
@@ -689,7 +685,6 @@
       searchInput: document.getElementById("searchInput"),
       minPriceInput: document.getElementById("minPriceInput"),
       maxPriceInput: document.getElementById("maxPriceInput"),
-      pageInfo: document.getElementById("pageInfo"),
       reloadButton: document.getElementById("reloadButton"),
       resetButton: document.getElementById("resetButton"),
       titleResetButton: document.getElementById("titleResetButton"),
@@ -862,7 +857,7 @@
       if (state.restoredHistoryCode) openHistory(state.restoredHistoryCode, false);
       state.isRestoring = false;
       updateUrlState();
-      setReadyStatus("로드 완료: Google Sheets CSV 데이터를 표시 중입니다.");
+      setReadyStatus("상품 가격 정보를 최신 상태로 불러왔습니다.");
       els.meta.textContent = "마지막 업데이트 " + dateFormatter.format(state.loadedAt);
     }
 
@@ -945,12 +940,18 @@
     }
 
     function applyFilters() {
-      state.filtered = baseFilteredRows().filter((row) => {
+      const baseRows = baseFilteredRows();
+      state.filtered = baseRows.filter((row) => {
         const matchesView = state.viewFilter === "all"
           || (state.viewFilter === "in" && row.inStock)
           || (state.viewFilter === "discount" && row.inStock && row.delta !== null && row.delta < 0);
         return matchesView;
       });
+
+      if (state.filtered.length === 0 && state.viewFilter !== "all" && baseRows.length > 0) {
+        state.viewFilter = "all";
+        state.filtered = baseRows;
+      }
 
       state.filtered.sort(getSorter());
       state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
@@ -978,8 +979,8 @@
       if (state.sortKey === "name") {
         return (a, b) => direction * byName(a, b);
       }
-      if (state.sortKey === "stock") {
-        return (a, b) => compareValues(a.inStock ? 1 : 0, b.inStock ? 1 : 0, direction) || byName(a, b);
+      if (state.sortKey === "priceTimestamp") {
+        return (a, b) => direction * compareDates(a.priceTimestamp, b.priceTimestamp) || byName(a, b);
       }
       return (a, b) => compareValues(a[state.sortKey], b[state.sortKey], direction) || byName(a, b);
     }
@@ -1023,10 +1024,6 @@
       els.rows.innerHTML = pageRows.map(renderRow).join("");
       els.empty.hidden = state.filtered.length !== 0;
 
-      const end = Math.min(pageRows.length, state.filtered.length);
-      els.pageInfo.textContent = state.filtered.length
-        ? numberFormatter.format(end) + " / " + numberFormatter.format(state.filtered.length) + "개"
-        : "0개";
       updateSortButtons();
       updateViewFilterButtons();
       updateUrlState();
@@ -1078,12 +1075,11 @@
         "<tr>",
         "<td><a class=\"product\" href=\"" + escapeAttribute(productUrl(row.code)) + "\" target=\"_blank\" rel=\"noopener noreferrer\">",
         renderImage(row),
-        "<div><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code\">" + escapeHtml(row.code || "-") + "</div></div>",
+        "<div class=\"product-text\"><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code-row\"><span class=\"code\">" + escapeHtml(row.code || "-") + "</span>" + stockChip(row) + "</div></div>",
         "</a></td>",
-        "<td class=\"num\">" + money(row.basePrice) + "</td>",
-        "<td class=\"num\">" + money(row.price) + "</td>",
-        "<td class=\"num delta" + discountClass + "\">" + percent(row.discountRate) + "</td>",
-        "<td>" + stockChip(row) + "</td>",
+        "<td class=\"num\">" + money(row.basePrice) + "<span class=\"subtext\">&nbsp;</span></td>",
+        "<td class=\"num\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
+        "<td class=\"num delta" + discountClass + "\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
         "<td><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
         "</tr>"
       ].join("");
@@ -1300,6 +1296,21 @@
       return value ? dateFormatter.format(value) : "-";
     }
 
+    function relativeTime(value) {
+      if (!value) return "";
+      const seconds = Math.max(0, Math.floor((Date.now() - value.getTime()) / 1000));
+      if (seconds < 60) return "방금";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + "분 전";
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + "시간 전";
+      const days = Math.floor(hours / 24);
+      if (days < 30) return days + "일 전";
+      const months = Math.floor(days / 30);
+      if (months < 12) return months + "개월 전";
+      return Math.floor(months / 12) + "년 전";
+    }
+
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (char) => ({
         "&": "&amp;",
@@ -1318,7 +1329,7 @@
       els.searchInput.value = "";
       state.viewFilter = "in";
       setDefaultPriceRange();
-      state.sortKey = "discountRate";
+      state.sortKey = "priceTimestamp";
       state.sortDir = "desc";
       state.visibleCount = LOAD_BATCH_SIZE;
       closeHistory(false);
@@ -1342,7 +1353,7 @@
         els.maxPriceInput.value = String(Number.isFinite(maxValue) ? Math.min(state.defaultMaxPrice, Math.max(0, maxValue)) : state.defaultMaxPrice);
       }
       clampPriceInputs();
-      if (["name", "basePrice", "price", "discountRate", "stock"].includes(sortKey)) {
+      if (["name", "basePrice", "price", "discountRate", "priceTimestamp"].includes(sortKey)) {
         state.sortKey = sortKey;
         state.sortDir = sortDir === "asc" ? "asc" : "desc";
       }
@@ -1360,7 +1371,7 @@
       if (state.viewFilter !== "in") params.set("view", state.viewFilter);
       if (min !== 0) params.set("min", String(min));
       if (max !== state.defaultMaxPrice) params.set("max", String(max));
-      if (state.sortKey !== "discountRate" || state.sortDir !== "desc") {
+      if (state.sortKey !== "priceTimestamp" || state.sortDir !== "desc") {
         params.set("sort", state.sortKey);
         params.set("dir", state.sortDir);
       }
