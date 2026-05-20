@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Costco 상품 가격 비교 | 현재가, 기준가, 할인율 이력</title>
+  <title>코스트코 온라인몰 할인 추적기</title>
   <meta name="description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 한 화면에서 검색, 필터, 정렬해 비교합니다.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f766e">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
-  <meta property="og:title" content="Costco 상품 가격 비교">
+  <meta property="og:title" content="코스트코 온라인몰 할인 추적기">
   <meta property="og:description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 검색하고 비교합니다.">
-  <meta property="og:site_name" content="Costco 상품 가격">
+  <meta property="og:site_name" content="코스트코 온라인몰 할인 추적기">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Costco 상품 가격 비교">
+  <meta name="twitter:title" content="코스트코 온라인몰 할인 추적기">
   <meta name="twitter:description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 검색하고 비교합니다.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "Costco 상품 가격 비교",
+      "name": "코스트코 온라인몰 할인 추적기",
       "applicationCategory": "ShoppingApplication",
       "operatingSystem": "Any",
       "inLanguage": "ko-KR",
@@ -116,6 +116,19 @@
       line-height: 1.1;
     }
 
+    .title-button {
+      display: inline;
+      min-height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: inherit;
+      text-align: left;
+    }
+
     .meta {
       margin-top: 8px;
       color: var(--muted);
@@ -124,7 +137,7 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(220px, 1.4fr) repeat(5, minmax(120px, 0.6fr)) auto;
+      grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(104px, 0.5fr)) max-content;
       gap: 10px;
       align-items: end;
       margin: 12px 0 18px;
@@ -143,6 +156,14 @@
       font-weight: 700;
     }
 
+    #resetButton {
+      width: auto;
+      min-width: 72px;
+      padding: 0 14px;
+      white-space: nowrap;
+      justify-self: start;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -151,11 +172,18 @@
     }
 
     .stat {
+      width: 100%;
+      text-align: left;
       min-height: 78px;
       padding: 13px 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--surface);
+    }
+
+    .stat.active {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
     }
 
     .stat span {
@@ -471,7 +499,7 @@
 
     .pager {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       gap: 10px;
       margin-top: 12px;
@@ -531,7 +559,7 @@
   <main class="shell">
     <header class="topbar">
       <div>
-        <h1>Costco 상품 가격</h1>
+        <h1><button class="title-button" id="titleResetButton" type="button">코스트코 온라인몰 할인 추적기</button></h1>
         <div class="meta" id="meta">데이터를 불러오는 중입니다.</div>
       </div>
       <button class="primary" id="reloadButton" type="button">새로고침</button>
@@ -543,14 +571,6 @@
         <input id="searchInput" type="search" placeholder="상품명 또는 코드">
       </div>
       <div class="field">
-        <label for="stockFilter">재고</label>
-        <select id="stockFilter">
-          <option value="all">전체</option>
-          <option value="in" selected>재고 있음</option>
-          <option value="out">품절</option>
-        </select>
-      </div>
-      <div class="field">
         <label for="minPriceInput">현재가 최소</label>
         <input id="minPriceInput" type="number" min="0" step="100" inputmode="numeric" value="0" required>
       </div>
@@ -558,33 +578,13 @@
         <label for="maxPriceInput">현재가 최대</label>
         <input id="maxPriceInput" type="number" min="0" step="100" inputmode="numeric" required>
       </div>
-      <div class="field">
-        <label for="sortSelect">정렬</label>
-        <select id="sortSelect">
-          <option value="name">상품명</option>
-          <option value="basePriceDesc">기준가 높은순</option>
-          <option value="basePriceAsc">기준가 낮은순</option>
-          <option value="priceDesc">가격 높은순</option>
-          <option value="priceAsc">가격 낮은순</option>
-          <option value="discountDesc" selected>기준가 대비 할인순</option>
-          <option value="stockDesc">재고 있음 우선</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="pageSizeSelect">표시 개수</label>
-        <select id="pageSizeSelect">
-          <option value="30">30개</option>
-          <option value="60" selected>60개</option>
-          <option value="120">120개</option>
-        </select>
-      </div>
       <button id="resetButton" type="button">초기화</button>
     </section>
 
     <section class="stats" aria-label="요약">
-      <div class="stat"><span>전체</span><strong id="productCount">0</strong></div>
-      <div class="stat"><span>판매 중</span><strong id="stockCount">0</strong></div>
-      <div class="stat"><span>할인 중</span><strong id="discountCount">0</strong></div>
+      <button class="stat" type="button" data-view-filter="all"><span>전체</span><strong id="productCount">0</strong></button>
+      <button class="stat" type="button" data-view-filter="in"><span>판매 중</span><strong id="stockCount">0</strong></button>
+      <button class="stat" type="button" data-view-filter="discount"><span>할인 중</span><strong id="discountCount">0</strong></button>
     </section>
 
     <div class="status" id="status"><span class="spinner"></span><span>products, prices, basePrices를 가져오고 있습니다.</span></div>
@@ -597,7 +597,7 @@
             <th class="num"><button class="sort-button" type="button" data-sort-key="basePrice">기준가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
-            <th><button class="sort-button" type="button" data-sort-key="stock">재고</button></th>
+            <th><button class="sort-button" type="button" data-sort-key="stock">품절 여부</button></th>
             <th>이력</th>
           </tr>
         </thead>
@@ -606,13 +606,7 @@
       <div class="empty" id="empty" hidden>조건에 맞는 상품이 없습니다.</div>
     </section>
 
-    <nav class="pager" aria-label="페이지">
-      <div id="pageInfo">0개</div>
-      <div class="pager-controls">
-        <button id="prevButton" type="button">이전</button>
-        <button id="nextButton" type="button">다음</button>
-      </div>
-    </nav>
+    <div class="pager" id="pageInfo">0개</div>
   </main>
 
   <div class="modal" id="historyModal" hidden>
@@ -672,8 +666,8 @@
       filtered: [],
       priceHistory: new Map(),
       basePriceHistory: new Map(),
-      page: 1,
-      pageSize: 60,
+      visibleCount: 20,
+      viewFilter: "in",
       sortKey: "discountRate",
       sortDir: "desc",
       defaultMaxPrice: 0,
@@ -681,6 +675,8 @@
       isRestoring: true,
       loadedAt: null
     };
+
+    const LOAD_BATCH_SIZE = 20;
 
     const els = {
       meta: document.getElementById("meta"),
@@ -691,16 +687,12 @@
       stockCount: document.getElementById("stockCount"),
       discountCount: document.getElementById("discountCount"),
       searchInput: document.getElementById("searchInput"),
-      stockFilter: document.getElementById("stockFilter"),
       minPriceInput: document.getElementById("minPriceInput"),
       maxPriceInput: document.getElementById("maxPriceInput"),
-      sortSelect: document.getElementById("sortSelect"),
-      pageSizeSelect: document.getElementById("pageSizeSelect"),
       pageInfo: document.getElementById("pageInfo"),
-      prevButton: document.getElementById("prevButton"),
-      nextButton: document.getElementById("nextButton"),
       reloadButton: document.getElementById("reloadButton"),
       resetButton: document.getElementById("resetButton"),
+      titleResetButton: document.getElementById("titleResetButton"),
       historyModal: document.getElementById("historyModal"),
       historyTitle: document.getElementById("historyTitle"),
       historySubtitle: document.getElementById("historySubtitle"),
@@ -708,7 +700,8 @@
       historyRows: document.getElementById("historyRows"),
       historyEmpty: document.getElementById("historyEmpty"),
       historyCloseButton: document.getElementById("historyCloseButton"),
-      sortButtons: document.querySelectorAll("[data-sort-key]")
+      sortButtons: document.querySelectorAll("[data-sort-key]"),
+      viewFilterButtons: document.querySelectorAll("[data-view-filter]")
     };
 
     const moneyFormatter = new Intl.NumberFormat("ko-KR", {
@@ -945,30 +938,37 @@
     }
 
     function updateStats() {
-      const rows = state.rows;
+      const rows = baseFilteredRows();
       els.productCount.textContent = numberFormatter.format(rows.length);
       els.stockCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock).length);
       els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock && row.delta !== null && row.delta < 0).length);
     }
 
     function applyFilters() {
-      const query = els.searchInput.value.trim().toLowerCase();
-      const stockFilter = els.stockFilter.value;
-      const minPrice = parsePriceInput(els.minPriceInput.value, 0);
-      const maxPrice = parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice);
-
-      state.filtered = state.rows.filter((row) => {
-        const matchesQuery = !query || row.name.toLowerCase().includes(query) || row.code.toLowerCase().includes(query);
-        const matchesStock = stockFilter === "all" || (stockFilter === "in" ? row.inStock : !row.inStock);
-        const matchesMinPrice = minPrice === null || (row.price !== null && row.price >= minPrice);
-        const matchesMaxPrice = maxPrice === null || (row.price !== null && row.price <= maxPrice);
-        return matchesQuery && matchesStock && matchesMinPrice && matchesMaxPrice;
+      state.filtered = baseFilteredRows().filter((row) => {
+        const matchesView = state.viewFilter === "all"
+          || (state.viewFilter === "in" && row.inStock)
+          || (state.viewFilter === "discount" && row.inStock && row.delta !== null && row.delta < 0);
+        return matchesView;
       });
 
       state.filtered.sort(getSorter());
-      const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
-      state.page = Math.min(state.page, maxPage);
+      state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
+      updateStats();
       render();
+    }
+
+    function baseFilteredRows() {
+      const query = els.searchInput.value.trim().toLowerCase();
+      const minPrice = parsePriceInput(els.minPriceInput.value, 0);
+      const maxPrice = parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice);
+
+      return state.rows.filter((row) => {
+        const matchesQuery = !query || row.name.toLowerCase().includes(query) || row.code.toLowerCase().includes(query);
+        const matchesMinPrice = minPrice === null || (row.price !== null && row.price >= minPrice);
+        const matchesMaxPrice = maxPrice === null || (row.price !== null && row.price <= maxPrice);
+        return matchesQuery && matchesMinPrice && matchesMaxPrice;
+      });
     }
 
     function getSorter() {
@@ -1019,20 +1019,34 @@
     }
 
     function render() {
-      const start = (state.page - 1) * state.pageSize;
-      const pageRows = state.filtered.slice(start, start + state.pageSize);
+      const pageRows = state.filtered.slice(0, state.visibleCount);
       els.rows.innerHTML = pageRows.map(renderRow).join("");
       els.empty.hidden = state.filtered.length !== 0;
 
-      const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
-      const end = Math.min(start + pageRows.length, state.filtered.length);
+      const end = Math.min(pageRows.length, state.filtered.length);
       els.pageInfo.textContent = state.filtered.length
-        ? numberFormatter.format(start + 1) + "-" + numberFormatter.format(end) + " / " + numberFormatter.format(state.filtered.length) + "개"
+        ? numberFormatter.format(end) + " / " + numberFormatter.format(state.filtered.length) + "개"
         : "0개";
-      els.prevButton.disabled = state.page <= 1;
-      els.nextButton.disabled = state.page >= totalPages;
       updateSortButtons();
+      updateViewFilterButtons();
       updateUrlState();
+    }
+
+    function updateViewFilterButtons() {
+      els.viewFilterButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.viewFilter === state.viewFilter);
+      });
+    }
+
+    function loadMoreRows() {
+      if (state.visibleCount >= state.filtered.length) return;
+      state.visibleCount = Math.min(state.visibleCount + LOAD_BATCH_SIZE, state.filtered.length);
+      render();
+    }
+
+    function maybeLoadMoreRows() {
+      const remaining = document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+      if (remaining < 500) loadMoreRows();
     }
 
     function setSort(key, dir, shouldUpdateUrl) {
@@ -1040,45 +1054,13 @@
       const previousDir = state.sortDir;
       state.sortKey = key;
       state.sortDir = dir || (previousKey === key ? (previousDir === "asc" ? "desc" : "asc") : defaultSortDir(key));
-      syncSortSelect();
-      state.page = 1;
+      state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
       if (shouldUpdateUrl !== false) updateUrlState();
     }
 
     function defaultSortDir(key) {
       return key === "name" ? "asc" : "desc";
-    }
-
-    function setSortFromSelect(value, shouldUpdateUrl) {
-      const presets = {
-        name: ["name", "asc"],
-        basePriceDesc: ["basePrice", "desc"],
-        basePriceAsc: ["basePrice", "asc"],
-        priceDesc: ["price", "desc"],
-        priceAsc: ["price", "asc"],
-        discountDesc: ["discountRate", "desc"],
-        stockDesc: ["stock", "desc"]
-      };
-      const preset = presets[value] || presets.name;
-      state.sortKey = preset[0];
-      state.sortDir = preset[1];
-      state.page = 1;
-      applyFilters();
-      if (shouldUpdateUrl !== false) updateUrlState();
-    }
-
-    function syncSortSelect() {
-      const value = {
-        "name:asc": "name",
-        "basePrice:desc": "basePriceDesc",
-        "basePrice:asc": "basePriceAsc",
-        "price:desc": "priceDesc",
-        "price:asc": "priceAsc",
-        "discountRate:desc": "discountDesc",
-        "stock:desc": "stockDesc"
-      }[state.sortKey + ":" + state.sortDir];
-      if (value) els.sortSelect.value = value;
     }
 
     function updateSortButtons() {
@@ -1090,6 +1072,7 @@
 
     function renderRow(row) {
       const discountClass = row.discountRate === null ? "" : row.discountRate > 0 ? " down" : row.discountRate < 0 ? " up" : "";
+      const historyCount = combinedHistory(row.code).length;
 
       return [
         "<tr>",
@@ -1101,7 +1084,7 @@
         "<td class=\"num\">" + money(row.price) + "</td>",
         "<td class=\"num delta" + discountClass + "\">" + percent(row.discountRate) + "</td>",
         "<td>" + stockChip(row) + "</td>",
-        "<td><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력</button></td>",
+        "<td><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
         "</tr>"
       ].join("");
     }
@@ -1130,15 +1113,31 @@
       const byTime = new Map();
       (state.priceHistory.get(code) || []).forEach((item) => {
         const key = String(item.timestamp.getTime());
-        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null });
-        byTime.get(key).price = item.value;
+        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null, hasPrice: false, hasBasePrice: false });
+        const entry = byTime.get(key);
+        entry.price = item.value;
+        entry.hasPrice = true;
       });
       (state.basePriceHistory.get(code) || []).forEach((item) => {
         const key = String(item.timestamp.getTime());
-        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null });
-        byTime.get(key).basePrice = item.value;
+        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null, hasPrice: false, hasBasePrice: false });
+        const entry = byTime.get(key);
+        entry.basePrice = item.value;
+        entry.hasBasePrice = true;
       });
-      return [...byTime.values()].sort((a, b) => compareDates(b.timestamp, a.timestamp));
+
+      let lastPrice = null;
+      let lastBasePrice = null;
+      return [...byTime.values()]
+        .sort((a, b) => compareDates(a.timestamp, b.timestamp))
+        .map((entry) => {
+          if (entry.hasPrice) lastPrice = entry.price;
+          else entry.price = lastPrice;
+          if (entry.hasBasePrice) lastBasePrice = entry.basePrice;
+          else entry.basePrice = lastBasePrice;
+          return entry;
+        })
+        .sort((a, b) => compareDates(b.timestamp, a.timestamp));
     }
 
     function renderHistoryRow(entry) {
@@ -1285,10 +1284,7 @@
     }
 
     function stockChip(row) {
-      if (!row.stock) return "<span class=\"chip dim\">미확인</span>";
-      return row.inStock
-        ? "<span class=\"chip\">" + escapeHtml(row.stock) + "</span>"
-        : "<span class=\"chip off\">" + escapeHtml(row.stock) + "</span>";
+      return row.inStock ? "" : "<span class=\"chip off\">품절</span>";
     }
 
     function money(value) {
@@ -1320,47 +1316,36 @@
 
     function resetFilters() {
       els.searchInput.value = "";
-      els.stockFilter.value = "in";
+      state.viewFilter = "in";
       setDefaultPriceRange();
-      els.sortSelect.value = "discountDesc";
       state.sortKey = "discountRate";
       state.sortDir = "desc";
-      els.pageSizeSelect.value = "60";
-      state.pageSize = 60;
-      state.page = 1;
+      state.visibleCount = LOAD_BATCH_SIZE;
       closeHistory(false);
       applyFilters();
     }
 
     function restoreStateFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const stock = params.get("stock");
-      const pageSize = Number(params.get("pageSize"));
-      const page = Number(params.get("page"));
       const sortKey = params.get("sort");
       const sortDir = params.get("dir");
       const min = params.get("min");
       const max = params.get("max");
+      const view = params.get("view");
       const history = params.get("history");
 
       els.searchInput.value = params.get("q") || "";
-      if (["all", "in", "out"].includes(stock)) els.stockFilter.value = stock;
+      if (["all", "in", "discount"].includes(view)) state.viewFilter = view;
       if (min !== null) els.minPriceInput.value = String(Math.max(0, Number(min) || 0));
       if (max !== null) {
         const maxValue = Number(max);
         els.maxPriceInput.value = String(Number.isFinite(maxValue) ? Math.min(state.defaultMaxPrice, Math.max(0, maxValue)) : state.defaultMaxPrice);
       }
       clampPriceInputs();
-      if ([30, 60, 120].includes(pageSize)) {
-        state.pageSize = pageSize;
-        els.pageSizeSelect.value = String(pageSize);
-      }
       if (["name", "basePrice", "price", "discountRate", "stock"].includes(sortKey)) {
         state.sortKey = sortKey;
         state.sortDir = sortDir === "asc" ? "asc" : "desc";
-        syncSortSelect();
       }
-      if (Number.isFinite(page) && page > 0) state.page = Math.floor(page);
       state.restoredHistoryCode = history ? cleanCode(history) : "";
     }
 
@@ -1372,15 +1357,13 @@
       const max = parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice);
 
       if (query) params.set("q", query);
-      if (els.stockFilter.value !== "in") params.set("stock", els.stockFilter.value);
+      if (state.viewFilter !== "in") params.set("view", state.viewFilter);
       if (min !== 0) params.set("min", String(min));
       if (max !== state.defaultMaxPrice) params.set("max", String(max));
       if (state.sortKey !== "discountRate" || state.sortDir !== "desc") {
         params.set("sort", state.sortKey);
         params.set("dir", state.sortDir);
       }
-      if (state.pageSize !== 60) params.set("pageSize", String(state.pageSize));
-      if (state.page !== 1) params.set("page", String(state.page));
       if (!els.historyModal.hidden && state.restoredHistoryCode) params.set("history", state.restoredHistoryCode);
 
       const queryString = params.toString();
@@ -1389,42 +1372,22 @@
     }
 
     els.searchInput.addEventListener("input", () => {
-      state.page = 1;
-      applyFilters();
-    });
-    els.stockFilter.addEventListener("change", () => {
-      state.page = 1;
+      state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
     });
     els.minPriceInput.addEventListener("input", () => {
       clampPriceInputs();
-      state.page = 1;
+      state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
     });
     els.maxPriceInput.addEventListener("input", () => {
       clampPriceInputs();
-      state.page = 1;
+      state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
-    });
-    els.sortSelect.addEventListener("change", () => {
-      setSortFromSelect(els.sortSelect.value);
-    });
-    els.pageSizeSelect.addEventListener("change", () => {
-      state.pageSize = Number(els.pageSizeSelect.value);
-      state.page = 1;
-      applyFilters();
-    });
-    els.prevButton.addEventListener("click", () => {
-      state.page = Math.max(1, state.page - 1);
-      render();
-    });
-    els.nextButton.addEventListener("click", () => {
-      const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
-      state.page = Math.min(totalPages, state.page + 1);
-      render();
     });
     els.reloadButton.addEventListener("click", loadAll);
     els.resetButton.addEventListener("click", resetFilters);
+    els.titleResetButton.addEventListener("click", resetFilters);
     els.rows.addEventListener("click", (event) => {
       const button = event.target.closest("[data-history-code]");
       if (button) openHistory(button.dataset.historyCode);
@@ -1436,8 +1399,16 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !els.historyModal.hidden) closeHistory();
     });
+    window.addEventListener("scroll", maybeLoadMoreRows, { passive: true });
     els.sortButtons.forEach((button) => {
       button.addEventListener("click", () => setSort(button.dataset.sortKey));
+    });
+    els.viewFilterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        state.viewFilter = button.dataset.viewFilter;
+        state.visibleCount = LOAD_BATCH_SIZE;
+        applyFilters();
+      });
     });
 
     loadAll();
