@@ -7,6 +7,10 @@
   <meta name="description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 한 화면에서 검색, 필터, 정렬해 비교합니다.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f766e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="코스트코 가격">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:title" content="코스트코 온라인몰 할인 추적기">
@@ -218,6 +222,55 @@
       border-color: #fecaca;
       background: #fff1f2;
       color: var(--bad);
+    }
+
+    .alert-panel {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .alert-copy {
+      min-width: 0;
+    }
+
+    .alert-title {
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .alert-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .alert-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .alert-button {
+      min-height: 34px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    .alert-button.active {
+      border-color: var(--accent);
+      background: #ecfdf5;
+      color: var(--accent);
+      font-weight: 800;
     }
 
     .spinner {
@@ -567,9 +620,25 @@
       }
 
       #resetButton,
-      #reloadButton {
+      #reloadButton,
+      #enableNotificationsButton,
+      #testNotificationButton {
         width: 100%;
         justify-self: stretch;
+      }
+
+      .alert-panel {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .alert-actions {
+        justify-content: stretch;
+      }
+
+      .alert-actions button {
+        flex: 1 1 120px;
       }
 
       .stats {
@@ -634,7 +703,7 @@
         font-size: 11px;
       }
 
-      th:last-child {
+      th:nth-last-child(-n + 2) {
         display: none;
       }
 
@@ -675,7 +744,7 @@
       }
 
       td:first-child,
-      td:last-child {
+      td:nth-last-child(-n + 2) {
         grid-column: 1 / -1;
       }
 
@@ -708,6 +777,11 @@
       }
 
       .history-button {
+        width: 100%;
+        min-height: 38px;
+      }
+
+      .alert-button {
         width: 100%;
         min-height: 38px;
       }
@@ -782,6 +856,17 @@
       <button class="stat" type="button" data-view-filter="discount"><span>할인 중</span><strong id="discountCount">0</strong></button>
     </section>
 
+    <section class="alert-panel" aria-label="가격 변동 알림">
+      <div class="alert-copy">
+        <div class="alert-title">상품별 가격 변동 알림</div>
+        <div class="alert-meta" id="notificationStatus">알림 권한을 켜고 상품별 알림을 설정하세요.</div>
+      </div>
+      <div class="alert-actions">
+        <button class="primary" id="enableNotificationsButton" type="button">알림 켜기</button>
+        <button id="testNotificationButton" type="button">테스트</button>
+      </div>
+    </section>
+
     <div class="status" id="status"><span class="spinner"></span><span>products, prices, basePrices를 가져오고 있습니다.</span></div>
 
     <section class="table-wrap" aria-label="상품 가격 목록">
@@ -793,6 +878,7 @@
             <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
             <th>이력</th>
+            <th>알림</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -853,12 +939,22 @@
       }
     };
 
+    const STORAGE_KEYS = {
+      alertCodes: "costco-alert-codes-v1",
+      priceSnapshot: "costco-price-snapshot-v1"
+    };
+    const DB_NAME = "costco-price-alerts";
+    const DB_VERSION = 1;
+    const DB_STORE = "kv";
+    const PRICE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+
     const state = {
       products: [],
       rows: [],
       filtered: [],
       priceHistory: new Map(),
       basePriceHistory: new Map(),
+      serviceWorkerRegistration: null,
       visibleCount: 20,
       viewFilter: "in",
       sortKey: "priceTimestamp",
@@ -885,6 +981,9 @@
       reloadButton: document.getElementById("reloadButton"),
       resetButton: document.getElementById("resetButton"),
       titleResetButton: document.getElementById("titleResetButton"),
+      notificationStatus: document.getElementById("notificationStatus"),
+      enableNotificationsButton: document.getElementById("enableNotificationsButton"),
+      testNotificationButton: document.getElementById("testNotificationButton"),
       historyModal: document.getElementById("historyModal"),
       historyTitle: document.getElementById("historyTitle"),
       historySubtitle: document.getElementById("historySubtitle"),
@@ -1004,7 +1103,7 @@
           loadCsvSource("prices"),
           loadCsvSource("basePrices")
         ]);
-        applyLoadedData(products, prices, basePrices);
+        await applyLoadedData(products, prices, basePrices);
       } catch (error) {
         setStatus("데이터를 불러오지 못했습니다. " + error.message, true);
         els.meta.textContent = "로드 실패";
@@ -1014,7 +1113,7 @@
       }
     }
 
-    function applyLoadedData(products, prices, basePrices) {
+    async function applyLoadedData(products, prices, basePrices) {
       const latestPrices = latestByCode(prices, "price");
       const latestBasePrices = latestByCode(basePrices, "basePrice");
       state.priceHistory = historyByCode(prices, "price");
@@ -1047,15 +1146,18 @@
 
       state.loadedAt = new Date();
       state.defaultMaxPrice = Math.max(0, ...state.rows.map((row) => row.price || 0));
+      await notifyPriceChanges(await detectPriceChanges(state.rows));
+      await savePriceSnapshot(state.rows);
       setDefaultPriceRange();
       restoreStateFromUrl();
       updateStats();
-      applyFilters();
+      await applyFilters();
       if (state.restoredHistoryCode) openHistory(state.restoredHistoryCode, false);
       state.isRestoring = false;
       updateUrlState();
       setReadyStatus("상품 가격 정보를 최신 상태로 불러왔습니다.");
       els.meta.textContent = "마지막 업데이트 " + dateFormatter.format(state.loadedAt);
+      await updateNotificationUi();
     }
 
     function latestByCode(rows, valueKey) {
@@ -1136,7 +1238,7 @@
       els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock && row.delta !== null && row.delta < 0).length);
     }
 
-    function applyFilters() {
+    async function applyFilters() {
       const baseRows = baseFilteredRows();
       state.filtered = baseRows.filter((row) => {
         const matchesView = state.viewFilter === "all"
@@ -1153,7 +1255,7 @@
       state.filtered.sort(getSorter());
       state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
       updateStats();
-      render();
+      await render();
     }
 
     function baseFilteredRows() {
@@ -1216,9 +1318,10 @@
       els.maxPriceInput.value = String(Math.min(maxPrice, maxAllowed));
     }
 
-    function render() {
+    async function render() {
       const pageRows = state.filtered.slice(0, state.visibleCount);
-      els.rows.innerHTML = pageRows.map(renderRow).join("");
+      const alertCodes = await getAlertCodes();
+      els.rows.innerHTML = pageRows.map((row) => renderRow(row, alertCodes)).join("");
       els.empty.hidden = state.filtered.length !== 0;
 
       updateSortButtons();
@@ -1274,9 +1377,10 @@
       });
     }
 
-    function renderRow(row) {
+    function renderRow(row, alertCodes) {
       const discountClass = row.discountRate === null ? "" : row.discountRate > 0 ? " down" : row.discountRate < 0 ? " up" : "";
       const historyCount = combinedHistory(row.code).length;
+      const alertActive = alertCodes.has(row.code);
 
       return [
         "<tr>",
@@ -1288,8 +1392,214 @@
         "<td class=\"num\" data-label=\"현재가\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
         "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
         "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
+        "<td data-label=\"알림\"><button class=\"alert-button" + (alertActive ? " active" : "") + "\" type=\"button\" data-alert-code=\"" + escapeAttribute(row.code) + "\" aria-pressed=\"" + String(alertActive) + "\">" + (alertActive ? "알림 중" : "알림 설정") + "</button></td>",
         "</tr>"
       ].join("");
+    }
+
+    function openDb() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function getDbValue(key, fallback) {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const request = db.transaction(DB_STORE, "readonly").objectStore(DB_STORE).get(key);
+        request.onsuccess = () => resolve(request.result === undefined ? fallback : request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function setDbValue(key, value) {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const request = db.transaction(DB_STORE, "readwrite").objectStore(DB_STORE).put(value, key);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function getAlertCodes() {
+      try {
+        const saved = await getDbValue(STORAGE_KEYS.alertCodes, []);
+        return new Set(Array.isArray(saved) ? saved.map(cleanCode).filter(Boolean) : []);
+      } catch (error) {
+        console.warn("알림 설정을 불러오지 못했습니다.", error);
+        return new Set();
+      }
+    }
+
+    async function setAlertCodes(alertCodes) {
+      await setDbValue(STORAGE_KEYS.alertCodes, [...alertCodes]);
+    }
+
+    async function toggleAlert(code) {
+      const clean = cleanCode(code);
+      if (!clean) return;
+      const alertCodes = await getAlertCodes();
+      if (!alertCodes.has(clean)) {
+        await enableNotifications();
+        alertCodes.add(clean);
+      } else {
+        alertCodes.delete(clean);
+      }
+      await setAlertCodes(alertCodes);
+      await savePriceSnapshot(state.rows);
+      await registerPeriodicPriceCheck();
+      requestServiceWorkerPriceCheck();
+      await updateNotificationUi();
+      await render();
+    }
+
+    async function readPriceSnapshot() {
+      try {
+        const saved = await getDbValue(STORAGE_KEYS.priceSnapshot, {});
+        return saved && typeof saved === "object" ? saved : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    async function savePriceSnapshot(rows) {
+      const alertCodes = await getAlertCodes();
+      const snapshot = {};
+      rows.forEach((row) => {
+        if (!row.code || !alertCodes.has(row.code)) return;
+        snapshot[row.code] = {
+          price: row.price,
+          basePrice: row.basePrice,
+          name: row.name,
+          updatedAt: row.priceTimestamp ? row.priceTimestamp.toISOString() : null
+        };
+      });
+      await setDbValue(STORAGE_KEYS.priceSnapshot, snapshot);
+    }
+
+    async function detectPriceChanges(rows) {
+      const previous = await readPriceSnapshot();
+      const alertCodes = await getAlertCodes();
+      return rows
+        .filter((row) => alertCodes.has(row.code))
+        .map((row) => {
+          const old = previous[row.code];
+          if (!old || old.price === null || row.price === null || old.price === row.price) return null;
+          return {
+            code: row.code,
+            name: row.name,
+            oldPrice: old.price,
+            newPrice: row.price,
+            direction: row.price > old.price ? "up" : "down"
+          };
+        })
+        .filter(Boolean);
+    }
+
+    async function notifyPriceChanges(changes) {
+      if (!changes.length || !canShowNotifications()) return;
+      await ensureServiceWorker();
+      const visibleChanges = changes.slice(0, 5);
+      visibleChanges.forEach((change) => {
+        showAppNotification(
+          change.direction === "down" ? "가격이 내려갔습니다" : "가격이 올랐습니다",
+          change.name + "\n" + money(change.oldPrice) + " → " + money(change.newPrice),
+          { productCode: change.code, url: productUrl(change.code) }
+        );
+      });
+      if (changes.length > visibleChanges.length) {
+        showAppNotification("가격 변동 알림", "추가 " + numberFormatter.format(changes.length - visibleChanges.length) + "개 상품의 가격이 바뀌었습니다.", {});
+      }
+    }
+
+    function canShowNotifications() {
+      return "Notification" in window && Notification.permission === "granted";
+    }
+
+    async function ensureServiceWorker() {
+      if (!("serviceWorker" in navigator)) return null;
+      if (state.serviceWorkerRegistration) return state.serviceWorkerRegistration;
+      try {
+        state.serviceWorkerRegistration = await navigator.serviceWorker.register("sw.js");
+        return state.serviceWorkerRegistration;
+      } catch (error) {
+        console.warn("서비스워커를 등록하지 못했습니다.", error);
+        return null;
+      }
+    }
+
+    async function enableNotifications() {
+      if (!("Notification" in window)) {
+        await updateNotificationUi("이 브라우저는 알림을 지원하지 않습니다.");
+        return false;
+      }
+      await ensureServiceWorker();
+      if (Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+      if (Notification.permission === "granted") {
+        await registerPeriodicPriceCheck();
+        requestServiceWorkerPriceCheck();
+      }
+      await updateNotificationUi();
+      return Notification.permission === "granted";
+    }
+
+    async function registerPeriodicPriceCheck() {
+      const registration = await ensureServiceWorker();
+      if (!registration || !("periodicSync" in registration) || !canShowNotifications()) return false;
+      try {
+        await registration.periodicSync.register("price-check", { minInterval: PRICE_CHECK_INTERVAL_MS });
+        return true;
+      } catch (error) {
+        console.warn("백그라운드 주기 확인을 등록하지 못했습니다.", error);
+        return false;
+      }
+    }
+
+    function requestServiceWorkerPriceCheck() {
+      if (!state.serviceWorkerRegistration || !state.serviceWorkerRegistration.active) return;
+      state.serviceWorkerRegistration.active.postMessage({ type: "CHECK_PRICES" });
+    }
+
+    function showAppNotification(title, body, data) {
+      const options = {
+        body,
+        tag: data.productCode ? "costco-price-" + data.productCode : "costco-price-summary",
+        data,
+        icon: "icon.svg",
+        badge: "icon.svg"
+      };
+      if (state.serviceWorkerRegistration) {
+        state.serviceWorkerRegistration.showNotification(title, options);
+      } else {
+        new Notification(title, options);
+      }
+    }
+
+    async function updateNotificationUi(message) {
+      const count = (await getAlertCodes()).size;
+      const permission = "Notification" in window ? Notification.permission : "unsupported";
+      const permissionText = permission === "granted"
+        ? "알림 허용됨"
+        : permission === "denied"
+          ? "브라우저에서 알림이 차단됨"
+          : permission === "unsupported"
+            ? "알림 미지원"
+            : "알림 권한 필요";
+      const backgroundText = state.serviceWorkerRegistration && "periodicSync" in state.serviceWorkerRegistration
+        ? "백그라운드 1시간 확인"
+        : "앱 실행 중 확인";
+      els.notificationStatus.textContent = message || permissionText + " · 설정된 상품 " + numberFormatter.format(count) + "개 · " + backgroundText;
+      els.enableNotificationsButton.disabled = permission === "denied" || permission === "unsupported";
+      els.enableNotificationsButton.textContent = permission === "granted" ? "알림 켜짐" : "알림 켜기";
+      els.testNotificationButton.disabled = permission !== "granted";
     }
 
     function openHistory(code, shouldUpdateUrl) {
@@ -1606,7 +1916,19 @@
     els.reloadButton.addEventListener("click", loadAll);
     els.resetButton.addEventListener("click", resetFilters);
     els.titleResetButton.addEventListener("click", resetFilters);
+    els.enableNotificationsButton.addEventListener("click", enableNotifications);
+    els.testNotificationButton.addEventListener("click", async () => {
+      await enableNotifications();
+      if (canShowNotifications()) {
+        showAppNotification("테스트 알림", "가격 변동이 감지되면 설정한 상품별로 알림을 보냅니다.", {});
+      }
+    });
     els.rows.addEventListener("click", (event) => {
+      const alertButton = event.target.closest("[data-alert-code]");
+      if (alertButton) {
+        toggleAlert(alertButton.dataset.alertCode);
+        return;
+      }
       const button = event.target.closest("[data-history-code]");
       if (button) openHistory(button.dataset.historyCode);
     });
@@ -1629,7 +1951,15 @@
       });
     });
 
-    loadAll();
+    async function init() {
+      await ensureServiceWorker();
+      await registerPeriodicPriceCheck();
+      await updateNotificationUi();
+      loadAll();
+      window.setInterval(requestServiceWorkerPriceCheck, PRICE_CHECK_INTERVAL_MS);
+    }
+
+    init();
   </script>
 </body>
 </html>

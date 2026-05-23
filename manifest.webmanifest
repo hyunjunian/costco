@@ -1,0 +1,20 @@
+{
+  "name": "코스트코 온라인몰 할인 추적기",
+  "short_name": "코스트코 가격",
+  "description": "코스트코 온라인몰 상품 가격과 가격 변동 알림을 확인합니다.",
+  "lang": "ko-KR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7fa",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
