@@ -541,15 +541,212 @@
       }
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 720px) {
       .shell {
-        padding: 12px;
+        padding: 10px;
+      }
+
+      .topbar {
+        gap: 12px;
+        padding-top: 10px;
+      }
+
+      h1 {
+        font-size: 26px;
+        line-height: 1.15;
+      }
+
+      .meta {
+        font-size: 13px;
       }
 
       .toolbar {
+        gap: 9px;
+        margin-bottom: 12px;
         padding: 12px;
       }
 
+      #resetButton,
+      #reloadButton {
+        width: 100%;
+        justify-self: stretch;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .stat {
+        min-height: 66px;
+        padding: 10px 8px;
+        text-align: center;
+      }
+
+      .stat strong {
+        margin-top: 6px;
+        font-size: 21px;
+      }
+
+      .status {
+        align-items: flex-start;
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      td {
+        display: block;
+      }
+
+      table {
+        min-width: 0;
+      }
+
+      thead {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      thead tr {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      th {
+        display: block;
+        padding: 0;
+        border-bottom: 0;
+        background: transparent;
+        font-size: 11px;
+      }
+
+      th:last-child {
+        display: none;
+      }
+
+      .sort-button {
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 6px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        text-align: center;
+      }
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tbody tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      tbody tr:hover {
+        background: var(--surface);
+      }
+
+      td {
+        min-width: 0;
+        padding: 0;
+        border-bottom: 0;
+      }
+
+      td:first-child,
+      td:last-child {
+        grid-column: 1 / -1;
+      }
+
+      td:not(:first-child)::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 2px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .product {
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 11px;
+      }
+
+      .thumb {
+        width: 64px;
+        height: 64px;
+      }
+
+      .name {
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .num {
+        text-align: left;
+      }
+
+      .history-button {
+        width: 100%;
+        min-height: 38px;
+      }
+
+      .modal {
+        align-items: end;
+        padding: 8px;
+      }
+
+      .dialog {
+        width: 100%;
+        max-height: calc(100dvh - 16px);
+        border-radius: 8px;
+      }
+
+      .dialog-head {
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .dialog-title {
+        font-size: 16px;
+      }
+
+      .chart-panel {
+        padding: 12px;
+      }
+
+      .history-chart {
+        height: 220px;
+      }
+
+      .history-table {
+        min-width: 0;
+      }
+
+      .history-table tbody tr {
+        box-shadow: none;
+      }
     }
   </style>
 </head>
@@ -1087,10 +1284,10 @@
         renderImage(row),
         "<div class=\"product-text\"><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code-row\"><span class=\"code\">" + escapeHtml(row.code || "-") + "</span>" + stockChip(row) + "</div></div>",
         "</a></td>",
-        "<td class=\"num\">" + money(row.basePrice) + "<span class=\"subtext\">&nbsp;</span></td>",
-        "<td class=\"num\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
-        "<td class=\"num delta" + discountClass + "\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
-        "<td><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
+        "<td class=\"num\" data-label=\"기준가\">" + money(row.basePrice) + "<span class=\"subtext\">&nbsp;</span></td>",
+        "<td class=\"num\" data-label=\"현재가\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
+        "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
+        "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
         "</tr>"
       ].join("");
     }
@@ -1153,10 +1350,10 @@
       const rateClass = rate === null ? "" : rate > 0 ? " down" : rate < 0 ? " up" : "";
       return [
         "<tr>",
-        "<td>" + dateText(entry.timestamp) + "</td>",
-        "<td class=\"num\">" + money(entry.basePrice) + "</td>",
-        "<td class=\"num\">" + money(entry.price) + "</td>",
-        "<td class=\"num delta" + rateClass + "\">" + percent(rate) + "</td>",
+        "<td data-label=\"시각\">" + dateText(entry.timestamp) + "</td>",
+        "<td class=\"num\" data-label=\"기준가\">" + money(entry.basePrice) + "</td>",
+        "<td class=\"num\" data-label=\"현재가\">" + money(entry.price) + "</td>",
+        "<td class=\"num delta" + rateClass + "\" data-label=\"할인율\">" + percent(rate) + "</td>",
         "</tr>"
       ].join("");
     }
