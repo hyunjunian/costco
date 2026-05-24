@@ -10,6 +10,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="코스트코 가격">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
@@ -190,6 +191,11 @@
       color: var(--accent);
     }
 
+    .field .check-filter:has(input:disabled) {
+      opacity: 0.52;
+      cursor: not-allowed;
+    }
+
     .field .check-filter input {
       width: 16px;
       min-width: 16px;
@@ -222,46 +228,14 @@
       font-size: 14px;
     }
 
+    .status[hidden] {
+      display: none;
+    }
+
     .status.error {
       border-color: #fecaca;
       background: #fff1f2;
       color: var(--bad);
-    }
-
-    .alert-panel {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .alert-copy {
-      min-width: 0;
-    }
-
-    .alert-title {
-      font-weight: 800;
-      line-height: 1.25;
-    }
-
-    .alert-meta {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .alert-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: flex-end;
     }
 
     .alert-button {
@@ -627,26 +601,9 @@
         padding: 12px;
       }
 
-      #resetButton,
-      #reloadButton,
-      #enableNotificationsButton,
-      #testNotificationButton {
+      #resetButton {
         width: 100%;
         justify-self: stretch;
-      }
-
-      .alert-panel {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 12px;
-      }
-
-      .alert-actions {
-        justify-content: stretch;
-      }
-
-      .alert-actions button {
-        flex: 1 1 120px;
       }
 
       .check-group {
@@ -891,7 +848,6 @@
         <h1><button class="title-button" id="titleResetButton" type="button">코스트코 온라인몰 할인 추적기</button></h1>
         <div class="meta" id="meta">데이터를 불러오는 중입니다.</div>
       </div>
-      <button class="primary" id="reloadButton" type="button">새로고침</button>
     </header>
 
     <section class="toolbar" aria-label="상품 필터">
@@ -911,24 +867,13 @@
         <label>상품 상태</label>
         <div class="check-group">
           <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
-          <label class="check-filter"><input id="discountOnlyInput" type="checkbox"> 할인 상품만</label>
+          <label class="check-filter"><input id="discountOnlyInput" type="checkbox" checked> 할인 상품만</label>
         </div>
       </div>
       <button id="resetButton" type="button">초기화</button>
     </section>
 
-    <section class="alert-panel" aria-label="가격 변동 알림">
-      <div class="alert-copy">
-        <div class="alert-title">상품별 가격 변동 알림</div>
-        <div class="alert-meta" id="notificationStatus">알림 권한을 켜고 상품별 알림을 설정하세요.</div>
-      </div>
-      <div class="alert-actions">
-        <button class="primary" id="enableNotificationsButton" type="button">알림 켜기</button>
-        <button id="testNotificationButton" type="button">테스트</button>
-      </div>
-    </section>
-
-    <div class="status" id="status"><span class="spinner"></span><span>products, prices, basePrices를 가져오고 있습니다.</span></div>
+    <div class="status" id="status" hidden></div>
 
     <section class="table-wrap" aria-label="상품 가격 목록">
       <table>
@@ -938,7 +883,7 @@
             <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
             <th>이력</th>
-            <th>알림</th>
+            <th id="alertColumnHeader" hidden>알림</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -1016,12 +961,13 @@
       basePriceHistory: new Map(),
       serviceWorkerRegistration: null,
       visibleCount: 20,
-      sortKey: "priceTimestamp",
-      sortDir: "desc",
+      sortKey: "",
+      sortDir: "",
       defaultMaxPrice: 0,
       restoredHistoryCode: "",
       isRestoring: true,
       loadedAt: null,
+      canConfigureNotifications: false,
       renderId: 0
     };
 
@@ -1040,12 +986,9 @@
       maxPriceInput: document.getElementById("maxPriceInput"),
       inStockOnlyInput: document.getElementById("inStockOnlyInput"),
       discountOnlyInput: document.getElementById("discountOnlyInput"),
-      reloadButton: document.getElementById("reloadButton"),
       resetButton: document.getElementById("resetButton"),
       titleResetButton: document.getElementById("titleResetButton"),
-      notificationStatus: document.getElementById("notificationStatus"),
-      enableNotificationsButton: document.getElementById("enableNotificationsButton"),
-      testNotificationButton: document.getElementById("testNotificationButton"),
+      alertColumnHeader: document.getElementById("alertColumnHeader"),
       historyModal: document.getElementById("historyModal"),
       historyTitle: document.getElementById("historyTitle"),
       historySubtitle: document.getElementById("historySubtitle"),
@@ -1073,15 +1016,21 @@
     });
 
     function setStatus(message, isError) {
+      els.status.hidden = false;
       els.status.className = isError ? "status error" : "status";
       els.status.innerHTML = isError
         ? "<span>" + escapeHtml(message) + "</span>"
         : "<span class=\"spinner\"></span><span>" + escapeHtml(message) + "</span>";
     }
 
-    function setReadyStatus(message) {
+    function setReadyStatus() {
+      els.status.hidden = true;
       els.status.className = "status";
-      els.status.innerHTML = "<span>" + escapeHtml(message) + "</span>";
+      els.status.innerHTML = "";
+    }
+
+    function showNotice(message) {
+      window.alert(message);
     }
 
     function parseCsv(text) {
@@ -1156,7 +1105,6 @@
 
     async function loadAll() {
       setStatus("products, prices, basePrices를 가져오고 있습니다.", false);
-      els.reloadButton.disabled = true;
 
       try {
         const [products, prices, basePrices] = await Promise.all([
@@ -1169,8 +1117,6 @@
         setStatus("데이터를 불러오지 못했습니다. " + error.message, true);
         els.meta.textContent = "로드 실패";
         console.error(error);
-      } finally {
-        els.reloadButton.disabled = false;
       }
     }
 
@@ -1216,7 +1162,7 @@
       if (state.restoredHistoryCode) openHistory(state.restoredHistoryCode, false);
       state.isRestoring = false;
       updateUrlState();
-      setReadyStatus("상품 가격 정보를 최신 상태로 불러왔습니다.");
+      setReadyStatus();
       els.meta.textContent = "마지막 업데이트 " + dateFormatter.format(state.loadedAt);
       await updateNotificationUi();
     }
@@ -1292,12 +1238,51 @@
       return !["0", "false", "no", "n", "품절", "없음", "out", "outofstock", "soldout"].includes(text.replace(/\s+/g, ""));
     }
 
-    async function applyFilters() {
+    async function applyFilters(options = {}) {
+      resetProductStatusFilterAvailability();
+      if (options.resetProductStatus === true) {
+        els.inStockOnlyInput.checked = true;
+        els.discountOnlyInput.checked = true;
+      }
       state.filtered = baseFilteredRows();
+      state.filtered = disableEmptyProductStatusFilters(state.filtered) || state.filtered;
 
-      state.filtered.sort(getSorter());
+      const sorter = getSorter();
+      if (sorter) state.filtered.sort(sorter);
       state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
       await render();
+    }
+
+    function resetProductStatusFilterAvailability() {
+      els.inStockOnlyInput.disabled = false;
+      els.discountOnlyInput.disabled = false;
+    }
+
+    function disableProductStatusFilter(input) {
+      input.checked = false;
+      input.disabled = true;
+    }
+
+    function disableEmptyProductStatusFilters(filteredRows) {
+      if (filteredRows.length > 0 || (!els.inStockOnlyInput.checked && !els.discountOnlyInput.checked)) return null;
+
+      if (els.discountOnlyInput.checked) {
+        disableProductStatusFilter(els.discountOnlyInput);
+        const withoutDiscount = baseFilteredRows();
+        if (withoutDiscount.length > 0) {
+          return withoutDiscount;
+        }
+      }
+
+      if (els.inStockOnlyInput.checked) {
+        disableProductStatusFilter(els.inStockOnlyInput);
+        const withoutStock = baseFilteredRows();
+        if (withoutStock.length > 0) {
+          return withoutStock;
+        }
+      }
+
+      return baseFilteredRows();
     }
 
     function baseFilteredRows() {
@@ -1316,13 +1301,19 @@
     }
 
     function getSorter() {
-      const byName = (a, b) => a.name.localeCompare(b.name, "ko-KR") || a.code.localeCompare(b.code);
-      const direction = state.sortDir === "asc" ? 1 : -1;
-
-      if (state.sortKey === "priceTimestamp") {
-        return (a, b) => direction * compareDates(a.priceTimestamp, b.priceTimestamp) || byName(a, b);
+      if (state.sortKey === "price") {
+        const direction = state.sortDir === "asc" ? 1 : -1;
+        return (a, b) => compareValues(a.price, b.price, direction);
       }
-      return (a, b) => compareValues(a[state.sortKey], b[state.sortKey], direction) || byName(a, b);
+      if (state.sortKey === "discountRate") {
+        const direction = state.sortDir === "asc" ? 1 : -1;
+        return (a, b) => compareValues(a.discountRate, b.discountRate, direction);
+      }
+      return compareRowsByLatestPrice;
+    }
+
+    function compareRowsByLatestPrice(a, b) {
+      return compareDates(b.priceTimestamp, a.priceTimestamp);
     }
 
     function compareValues(a, b, direction) {
@@ -1331,9 +1322,6 @@
       if (aMissing && bMissing) return 0;
       if (aMissing) return 1;
       if (bMissing) return -1;
-      if (typeof a === "string" || typeof b === "string") {
-        return direction * String(a).localeCompare(String(b), "ko-KR");
-      }
       return direction * (a - b);
     }
 
@@ -1387,24 +1375,28 @@
       window.clearTimeout(searchFilterTimer);
       searchFilterTimer = window.setTimeout(() => {
         state.visibleCount = LOAD_BATCH_SIZE;
-        applyFilters();
+        applyFilters({ resetProductStatus: true });
       }, SEARCH_DEBOUNCE_MS);
     }
 
-    function setSort(key, dir, shouldUpdateUrl) {
-      const previousKey = state.sortKey;
-      const previousDir = state.sortDir;
-      if (dir) {
+    function defaultSortDir(key) {
+      return "desc";
+    }
+
+    function toggledSortDir(key) {
+      return defaultSortDir(key) === "asc" ? "desc" : "asc";
+    }
+
+    function setSort(key, shouldUpdateUrl) {
+      if (!["price", "discountRate"].includes(key)) return;
+      if (state.sortKey !== key) {
         state.sortKey = key;
-        state.sortDir = dir;
-      } else if (previousKey !== key) {
-        state.sortKey = key;
-        state.sortDir = "desc";
-      } else if (previousDir === "desc") {
-        state.sortDir = "asc";
+        state.sortDir = defaultSortDir(key);
+      } else if (state.sortDir === defaultSortDir(key)) {
+        state.sortDir = toggledSortDir(key);
       } else {
-        state.sortKey = "priceTimestamp";
-        state.sortDir = "desc";
+        state.sortKey = "";
+        state.sortDir = "";
       }
       state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
@@ -1422,6 +1414,9 @@
       const discountClass = row.discountRate === null ? "" : row.discountRate > 0 ? " down" : row.discountRate < 0 ? " up" : "";
       const historyCount = combinedHistory(row.code).length;
       const alertActive = alertCodes.has(row.code);
+      const alertCell = state.canConfigureNotifications
+        ? "<td data-label=\"알림\"><button class=\"alert-button" + (alertActive ? " active" : "") + "\" type=\"button\" data-alert-code=\"" + escapeAttribute(row.code) + "\" aria-pressed=\"" + String(alertActive) + "\">" + (alertActive ? "알림 중" : "알림 설정") + "</button></td>"
+        : "";
 
       return [
         "<tr>",
@@ -1432,7 +1427,7 @@
         "<td class=\"num\" data-label=\"현재가\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
         "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
         "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
-        "<td data-label=\"알림\"><button class=\"alert-button" + (alertActive ? " active" : "") + "\" type=\"button\" data-alert-code=\"" + escapeAttribute(row.code) + "\" aria-pressed=\"" + String(alertActive) + "\">" + (alertActive ? "알림 중" : "알림 설정") + "</button></td>",
+        alertCell,
         "</tr>"
       ].join("");
     }
@@ -1489,9 +1484,19 @@
     async function toggleAlert(code) {
       const clean = cleanCode(code);
       if (!clean) return;
+      await updateNotificationUi();
+      if (!state.canConfigureNotifications) {
+        await render();
+        return;
+      }
       const alertCodes = await getAlertCodes();
       if (!alertCodes.has(clean)) {
-        await enableNotifications();
+        const enabled = await enableNotifications();
+        if (!enabled) {
+          showNotice("알림 권한이 허용되지 않아 상품 알림을 설정하지 않았습니다.");
+          await render();
+          return;
+        }
         alertCodes.add(clean);
       } else {
         alertCodes.delete(clean);
@@ -1567,6 +1572,10 @@
       return "Notification" in window && Notification.permission === "granted";
     }
 
+    function canConfigureNotifications() {
+      return "Notification" in window && Notification.permission !== "denied";
+    }
+
     async function ensureServiceWorker() {
       if (!("serviceWorker" in navigator)) return null;
       if (state.serviceWorkerRegistration) return state.serviceWorkerRegistration;
@@ -1581,14 +1590,22 @@
 
     async function enableNotifications() {
       if (!("Notification" in window)) {
-        await updateNotificationUi("이 브라우저는 알림을 지원하지 않습니다.");
+        await updateNotificationUi();
         return false;
       }
-      await ensureServiceWorker();
+      if (Notification.permission === "denied") {
+        await updateNotificationUi();
+        return false;
+      }
       if (Notification.permission === "default") {
-        await Notification.requestPermission();
+        try {
+          await Notification.requestPermission();
+        } catch (error) {
+          console.warn("알림 권한을 요청하지 못했습니다.", error);
+        }
       }
       if (Notification.permission === "granted") {
+        await ensureServiceWorker();
         await registerPeriodicPriceCheck();
         requestServiceWorkerPriceCheck();
       }
@@ -1628,23 +1645,9 @@
       }
     }
 
-    async function updateNotificationUi(message) {
-      const count = (await getAlertCodes()).size;
-      const permission = "Notification" in window ? Notification.permission : "unsupported";
-      const permissionText = permission === "granted"
-        ? "알림 허용됨"
-        : permission === "denied"
-          ? "브라우저에서 알림이 차단됨"
-          : permission === "unsupported"
-            ? "알림 미지원"
-            : "알림 권한 필요";
-      const backgroundText = state.serviceWorkerRegistration && "periodicSync" in state.serviceWorkerRegistration
-        ? "백그라운드 1시간 확인"
-        : "앱 실행 중 확인";
-      els.notificationStatus.textContent = message || permissionText + " · 설정된 상품 " + numberFormatter.format(count) + "개 · " + backgroundText;
-      els.enableNotificationsButton.disabled = permission === "denied" || permission === "unsupported";
-      els.enableNotificationsButton.textContent = permission === "granted" ? "알림 켜짐" : "알림 켜기";
-      els.testNotificationButton.disabled = permission !== "granted";
+    async function updateNotificationUi() {
+      state.canConfigureNotifications = canConfigureNotifications();
+      els.alertColumnHeader.hidden = !state.canConfigureNotifications;
     }
 
     function openHistory(code, shouldUpdateUrl) {
@@ -1889,11 +1892,12 @@
 
     function resetFilters() {
       els.searchInput.value = "";
+      resetProductStatusFilterAvailability();
       els.inStockOnlyInput.checked = true;
-      els.discountOnlyInput.checked = false;
+      els.discountOnlyInput.checked = true;
       setDefaultPriceRange();
-      state.sortKey = "priceTimestamp";
-      state.sortDir = "desc";
+      state.sortKey = "";
+      state.sortDir = "";
       state.visibleCount = LOAD_BATCH_SIZE;
       closeHistory(false);
       applyFilters();
@@ -1901,26 +1905,26 @@
 
     function restoreStateFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const sortKey = params.get("sort");
-      const sortDir = params.get("dir");
       const min = params.get("min");
       const max = params.get("max");
       const history = params.get("history");
       const stock = params.get("stock");
       const discount = params.get("discount");
+      const sortKey = params.get("sort");
+      const sortDir = params.get("dir");
 
       els.searchInput.value = params.get("q") || "";
       els.inStockOnlyInput.checked = stock !== "0";
-      els.discountOnlyInput.checked = discount === "1";
+      els.discountOnlyInput.checked = discount !== "0";
       if (min !== null) els.minPriceInput.value = String(Math.max(0, Number(min) || 0));
       if (max !== null) {
         const maxValue = Number(max);
         els.maxPriceInput.value = String(Number.isFinite(maxValue) ? Math.min(state.defaultMaxPrice, Math.max(0, maxValue)) : state.defaultMaxPrice);
       }
       clampPriceInputs();
-      if (["price", "discountRate", "priceTimestamp"].includes(sortKey)) {
+      if (["price", "discountRate"].includes(sortKey)) {
         state.sortKey = sortKey;
-        state.sortDir = sortDir === "asc" ? "asc" : "desc";
+        state.sortDir = sortDir === toggledSortDir(sortKey) ? sortDir : defaultSortDir(sortKey);
       }
       state.restoredHistoryCode = history ? cleanCode(history) : "";
     }
@@ -1934,10 +1938,10 @@
 
       if (query) params.set("q", query);
       if (!els.inStockOnlyInput.checked) params.set("stock", "0");
-      if (els.discountOnlyInput.checked) params.set("discount", "1");
+      if (!els.discountOnlyInput.checked) params.set("discount", "0");
       if (min !== 0) params.set("min", String(min));
       if (max !== state.defaultMaxPrice) params.set("max", String(max));
-      if (state.sortKey !== "priceTimestamp" || state.sortDir !== "desc") {
+      if (state.sortKey) {
         params.set("sort", state.sortKey);
         params.set("dir", state.sortDir);
       }
@@ -1969,20 +1973,17 @@
       state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
     });
-    els.reloadButton.addEventListener("click", loadAll);
     els.resetButton.addEventListener("click", resetFilters);
     els.titleResetButton.addEventListener("click", resetFilters);
-    els.enableNotificationsButton.addEventListener("click", enableNotifications);
-    els.testNotificationButton.addEventListener("click", async () => {
-      await enableNotifications();
-      if (canShowNotifications()) {
-        showAppNotification("테스트 알림", "가격 변동이 감지되면 설정한 상품별로 알림을 보냅니다.", {});
-      }
-    });
-    els.rows.addEventListener("click", (event) => {
+    els.rows.addEventListener("click", async (event) => {
       const alertButton = event.target.closest("[data-alert-code]");
       if (alertButton) {
-        toggleAlert(alertButton.dataset.alertCode);
+        alertButton.disabled = true;
+        try {
+          await toggleAlert(alertButton.dataset.alertCode);
+        } finally {
+          if (alertButton.isConnected) alertButton.disabled = false;
+        }
         return;
       }
       const button = event.target.closest("[data-history-code]");
