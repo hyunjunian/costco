@@ -643,36 +643,51 @@
 
       thead {
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
       }
 
       thead tr {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 6px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
       }
 
       th {
         display: block;
-        min-height: 34px;
-        padding: 8px 6px;
-        border-bottom: 0;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: transparent;
-        font-size: 11px;
+        min-height: 38px;
+        padding: 0;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: var(--surface);
+        font-size: 12px;
         text-align: center;
       }
 
+      th:first-child,
       th:nth-last-child(-n + 2) {
         display: none;
       }
 
+      th:nth-child(3) {
+        border-right: 0;
+      }
+
       .sort-button {
         justify-content: center;
-        min-height: 34px;
-        padding: 0 6px;
+        min-height: 38px;
+        padding: 0 8px;
         text-align: center;
+      }
+
+      .sort-button[aria-sort="ascending"],
+      .sort-button[aria-sort="descending"] {
+        background: #ecfdf5;
+        color: var(--accent);
       }
 
       tbody {
@@ -968,6 +983,7 @@
       isRestoring: true,
       loadedAt: null,
       canConfigureNotifications: false,
+      notificationPermissionPromptDismissed: false,
       renderId: 0
     };
 
@@ -1493,7 +1509,9 @@
       if (!alertCodes.has(clean)) {
         const enabled = await enableNotifications();
         if (!enabled) {
-          showNotice("알림 권한이 허용되지 않아 상품 알림을 설정하지 않았습니다.");
+          showNotice(Notification.permission === "default"
+            ? "브라우저 알림 권한 요청을 먼저 허용해 주세요."
+            : "알림 권한이 허용되지 않아 상품 알림을 설정하지 않았습니다.");
           await render();
           return;
         }
@@ -1598,13 +1616,22 @@
         return false;
       }
       if (Notification.permission === "default") {
+        if (state.notificationPermissionPromptDismissed) {
+          await updateNotificationUi();
+          return false;
+        }
         try {
           await Notification.requestPermission();
+          if (Notification.permission === "default") {
+            state.notificationPermissionPromptDismissed = true;
+          }
         } catch (error) {
           console.warn("알림 권한을 요청하지 못했습니다.", error);
+          state.notificationPermissionPromptDismissed = true;
         }
       }
       if (Notification.permission === "granted") {
+        state.notificationPermissionPromptDismissed = false;
         await ensureServiceWorker();
         await registerPeriodicPriceCheck();
         requestServiceWorkerPriceCheck();
