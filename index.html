@@ -141,7 +141,7 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(104px, 0.5fr)) max-content;
+      grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(104px, 0.5fr)) minmax(172px, auto) max-content;
       gap: 10px;
       align-items: end;
       margin: 12px 0 18px;
@@ -160,48 +160,52 @@
       font-weight: 700;
     }
 
+    .check-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      min-height: 40px;
+    }
+
+    .field .check-filter {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      min-height: 34px;
+      margin-bottom: 0;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .field .check-filter:has(input:checked) {
+      border-color: var(--accent);
+      background: #ecfdf5;
+      color: var(--accent);
+    }
+
+    .field .check-filter input {
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      min-height: 16px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--accent);
+    }
+
     #resetButton {
       width: auto;
       min-width: 72px;
       padding: 0 14px;
       white-space: nowrap;
       justify-self: start;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .stat {
-      width: 100%;
-      text-align: left;
-      min-height: 78px;
-      padding: 13px 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-    }
-
-    .stat.active {
-      border-color: var(--accent);
-      box-shadow: inset 0 0 0 1px var(--accent);
-    }
-
-    .stat span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .stat strong {
-      display: block;
-      margin-top: 8px;
-      font-size: 24px;
-      line-height: 1;
     }
 
     .status {
@@ -589,8 +593,7 @@
 
     @media (max-width: 900px) {
       .topbar,
-      .toolbar,
-      .stats {
+      .toolbar {
         grid-template-columns: 1fr;
       }
 
@@ -646,21 +649,13 @@
         flex: 1 1 120px;
       }
 
-      .stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        margin-bottom: 12px;
+      .check-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
       }
 
-      .stat {
-        min-height: 66px;
-        padding: 10px 8px;
-        text-align: center;
-      }
-
-      .stat strong {
-        margin-top: 6px;
-        font-size: 21px;
+      .field .check-filter {
+        justify-content: center;
       }
 
       .status {
@@ -912,13 +907,14 @@
         <label for="maxPriceInput">현재가 최대</label>
         <input id="maxPriceInput" type="number" min="0" step="100" inputmode="numeric" required>
       </div>
+      <div class="field">
+        <label>상품 상태</label>
+        <div class="check-group">
+          <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
+          <label class="check-filter"><input id="discountOnlyInput" type="checkbox"> 할인 상품만</label>
+        </div>
+      </div>
       <button id="resetButton" type="button">초기화</button>
-    </section>
-
-    <section class="stats" aria-label="요약">
-      <button class="stat" type="button" data-view-filter="all"><span>전체</span><strong id="productCount">0</strong></button>
-      <button class="stat" type="button" data-view-filter="in"><span>판매 중</span><strong id="stockCount">0</strong></button>
-      <button class="stat" type="button" data-view-filter="discount"><span>할인 중</span><strong id="discountCount">0</strong></button>
     </section>
 
     <section class="alert-panel" aria-label="가격 변동 알림">
@@ -1020,7 +1016,6 @@
       basePriceHistory: new Map(),
       serviceWorkerRegistration: null,
       visibleCount: 20,
-      viewFilter: "in",
       sortKey: "priceTimestamp",
       sortDir: "desc",
       defaultMaxPrice: 0,
@@ -1040,12 +1035,11 @@
       status: document.getElementById("status"),
       rows: document.getElementById("rows"),
       empty: document.getElementById("empty"),
-      productCount: document.getElementById("productCount"),
-      stockCount: document.getElementById("stockCount"),
-      discountCount: document.getElementById("discountCount"),
       searchInput: document.getElementById("searchInput"),
       minPriceInput: document.getElementById("minPriceInput"),
       maxPriceInput: document.getElementById("maxPriceInput"),
+      inStockOnlyInput: document.getElementById("inStockOnlyInput"),
+      discountOnlyInput: document.getElementById("discountOnlyInput"),
       reloadButton: document.getElementById("reloadButton"),
       resetButton: document.getElementById("resetButton"),
       titleResetButton: document.getElementById("titleResetButton"),
@@ -1059,8 +1053,7 @@
       historyRows: document.getElementById("historyRows"),
       historyEmpty: document.getElementById("historyEmpty"),
       historyCloseButton: document.getElementById("historyCloseButton"),
-      sortButtons: document.querySelectorAll("[data-sort-key]"),
-      viewFilterButtons: document.querySelectorAll("[data-view-filter]")
+      sortButtons: document.querySelectorAll("[data-sort-key]")
     };
 
     const moneyFormatter = new Intl.NumberFormat("ko-KR", {
@@ -1219,7 +1212,6 @@
       await savePriceSnapshot(state.rows);
       setDefaultPriceRange();
       restoreStateFromUrl();
-      updateStats();
       await applyFilters();
       if (state.restoredHistoryCode) openHistory(state.restoredHistoryCode, false);
       state.isRestoring = false;
@@ -1300,30 +1292,11 @@
       return !["0", "false", "no", "n", "품절", "없음", "out", "outofstock", "soldout"].includes(text.replace(/\s+/g, ""));
     }
 
-    function updateStats(rows) {
-      rows = rows || baseFilteredRows();
-      els.productCount.textContent = numberFormatter.format(rows.length);
-      els.stockCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock).length);
-      els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock && row.delta !== null && row.delta < 0).length);
-    }
-
     async function applyFilters() {
-      const baseRows = baseFilteredRows();
-      state.filtered = baseRows.filter((row) => {
-        const matchesView = state.viewFilter === "all"
-          || (state.viewFilter === "in" && row.inStock)
-          || (state.viewFilter === "discount" && row.inStock && row.delta !== null && row.delta < 0);
-        return matchesView;
-      });
-
-      if (state.filtered.length === 0 && state.viewFilter !== "all" && baseRows.length > 0) {
-        state.viewFilter = "all";
-        state.filtered = baseRows;
-      }
+      state.filtered = baseFilteredRows();
 
       state.filtered.sort(getSorter());
       state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
-      updateStats(baseRows);
       await render();
     }
 
@@ -1336,7 +1309,9 @@
         const matchesQuery = !query || row.searchText.includes(query);
         const matchesMinPrice = minPrice === null || (row.price !== null && row.price >= minPrice);
         const matchesMaxPrice = maxPrice === null || (row.price !== null && row.price <= maxPrice);
-        return matchesQuery && matchesMinPrice && matchesMaxPrice;
+        const matchesStock = !els.inStockOnlyInput.checked || row.inStock;
+        const matchesDiscount = !els.discountOnlyInput.checked || (row.inStock && row.delta !== null && row.delta < 0);
+        return matchesQuery && matchesMinPrice && matchesMaxPrice && matchesStock && matchesDiscount;
       });
     }
 
@@ -1394,14 +1369,7 @@
       els.empty.hidden = state.filtered.length !== 0;
 
       updateSortButtons();
-      updateViewFilterButtons();
       updateUrlState();
-    }
-
-    function updateViewFilterButtons() {
-      els.viewFilterButtons.forEach((button) => {
-        button.classList.toggle("active", button.dataset.viewFilter === state.viewFilter);
-      });
     }
 
     function loadMoreRows() {
@@ -1921,7 +1889,8 @@
 
     function resetFilters() {
       els.searchInput.value = "";
-      state.viewFilter = "in";
+      els.inStockOnlyInput.checked = true;
+      els.discountOnlyInput.checked = false;
       setDefaultPriceRange();
       state.sortKey = "priceTimestamp";
       state.sortDir = "desc";
@@ -1936,11 +1905,13 @@
       const sortDir = params.get("dir");
       const min = params.get("min");
       const max = params.get("max");
-      const view = params.get("view");
       const history = params.get("history");
+      const stock = params.get("stock");
+      const discount = params.get("discount");
 
       els.searchInput.value = params.get("q") || "";
-      if (["all", "in", "discount"].includes(view)) state.viewFilter = view;
+      els.inStockOnlyInput.checked = stock !== "0";
+      els.discountOnlyInput.checked = discount === "1";
       if (min !== null) els.minPriceInput.value = String(Math.max(0, Number(min) || 0));
       if (max !== null) {
         const maxValue = Number(max);
@@ -1962,7 +1933,8 @@
       const max = parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice);
 
       if (query) params.set("q", query);
-      if (state.viewFilter !== "in") params.set("view", state.viewFilter);
+      if (!els.inStockOnlyInput.checked) params.set("stock", "0");
+      if (els.discountOnlyInput.checked) params.set("discount", "1");
       if (min !== 0) params.set("min", String(min));
       if (max !== state.defaultMaxPrice) params.set("max", String(max));
       if (state.sortKey !== "priceTimestamp" || state.sortDir !== "desc") {
@@ -1986,6 +1958,14 @@
     });
     els.maxPriceInput.addEventListener("input", () => {
       clampPriceInputs();
+      state.visibleCount = LOAD_BATCH_SIZE;
+      applyFilters();
+    });
+    els.inStockOnlyInput.addEventListener("change", () => {
+      state.visibleCount = LOAD_BATCH_SIZE;
+      applyFilters();
+    });
+    els.discountOnlyInput.addEventListener("change", () => {
       state.visibleCount = LOAD_BATCH_SIZE;
       applyFilters();
     });
@@ -2019,14 +1999,6 @@
     els.sortButtons.forEach((button) => {
       button.addEventListener("click", () => setSort(button.dataset.sortKey));
     });
-    els.viewFilterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        state.viewFilter = button.dataset.viewFilter;
-        state.visibleCount = LOAD_BATCH_SIZE;
-        applyFilters();
-      });
-    });
-
     async function init() {
       await ensureServiceWorker();
       await registerPeriodicPriceCheck();
