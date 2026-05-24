@@ -339,6 +339,11 @@
       text-align: inherit;
     }
 
+    th.num .sort-button {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
     .sort-button::after {
       content: "↕";
       color: #94a3b8;
@@ -691,16 +696,20 @@
 
       thead tr {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 6px;
       }
 
       th {
         display: block;
-        padding: 0;
+        min-height: 34px;
+        padding: 8px 6px;
         border-bottom: 0;
+        border: 1px solid var(--line);
+        border-radius: 6px;
         background: transparent;
         font-size: 11px;
+        text-align: center;
       }
 
       th:nth-last-child(-n + 2) {
@@ -711,9 +720,6 @@
         justify-content: center;
         min-height: 34px;
         padding: 0 6px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: var(--surface);
         text-align: center;
       }
 
@@ -743,9 +749,16 @@
         border-bottom: 0;
       }
 
-      td:first-child,
-      td:nth-last-child(-n + 2) {
+      td:first-child {
         grid-column: 1 / -1;
+      }
+
+      td:nth-last-child(2) {
+        grid-column: 1;
+      }
+
+      td:last-child {
+        grid-column: 2;
       }
 
       td:not(:first-child)::before {
@@ -755,6 +768,10 @@
         color: var(--muted);
         font-size: 11px;
         font-weight: 800;
+      }
+
+      td:nth-last-child(-n + 2)::before {
+        content: none;
       }
 
       .product {
@@ -788,38 +805,86 @@
 
       .modal {
         align-items: end;
-        padding: 8px;
+        padding: 0;
       }
 
       .dialog {
         width: 100%;
-        max-height: calc(100dvh - 16px);
-        border-radius: 8px;
+        max-height: 92dvh;
+        border-radius: 14px 14px 0 0;
+        grid-template-rows: auto minmax(0, 1fr);
       }
 
       .dialog-head {
-        gap: 10px;
-        padding: 12px;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 14px 12px;
       }
 
       .dialog-title {
         font-size: 16px;
+        line-height: 1.3;
+      }
+
+      .dialog-subtitle {
+        font-size: 12px;
+      }
+
+      #historyCloseButton {
+        min-width: 54px;
+        min-height: 36px;
+        padding: 0 10px;
+      }
+
+      .dialog-body {
+        min-height: 0;
+        padding-bottom: env(safe-area-inset-bottom);
       }
 
       .chart-panel {
-        padding: 12px;
+        padding: 12px 12px 10px;
       }
 
       .history-chart {
-        height: 220px;
+        height: 190px;
       }
 
       .history-table {
         min-width: 0;
       }
 
+      .history-table thead {
+        display: none;
+      }
+
       .history-table tbody tr {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        margin: 0 12px 10px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
         box-shadow: none;
+      }
+
+      .history-table tbody tr:first-child {
+        margin-top: 12px;
+      }
+
+      .history-table td:first-child {
+        grid-column: 1 / -1;
+        font-weight: 800;
+      }
+
+      .history-table td:nth-last-child(3),
+      .history-table td:nth-last-child(2),
+      .history-table td:last-child {
+        grid-column: auto;
+      }
+
+      .history-table td:nth-last-child(-n + 3)::before {
+        content: attr(data-label);
       }
     }
   </style>
@@ -873,8 +938,7 @@
       <table>
         <thead>
           <tr>
-            <th><button class="sort-button" type="button" data-sort-key="name">상품</button></th>
-            <th class="num"><button class="sort-button" type="button" data-sort-key="basePrice">기준가</button></th>
+            <th>상품</th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
             <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
             <th>이력</th>
@@ -962,10 +1026,14 @@
       defaultMaxPrice: 0,
       restoredHistoryCode: "",
       isRestoring: true,
-      loadedAt: null
+      loadedAt: null,
+      renderId: 0
     };
 
     const LOAD_BATCH_SIZE = 20;
+    const SEARCH_DEBOUNCE_MS = 120;
+    let searchFilterTimer = 0;
+    let dbPromise = null;
 
     const els = {
       meta: document.getElementById("meta"),
@@ -1130,6 +1198,7 @@
         return {
           code,
           name: product.name || "(이름 없음)",
+          searchText: ((product.name || "") + " " + code).toLowerCase(),
           image: product.image || "",
           stock: product.stock || "",
           inStock: isInStock(product.stock),
@@ -1231,8 +1300,8 @@
       return !["0", "false", "no", "n", "품절", "없음", "out", "outofstock", "soldout"].includes(text.replace(/\s+/g, ""));
     }
 
-    function updateStats() {
-      const rows = baseFilteredRows();
+    function updateStats(rows) {
+      rows = rows || baseFilteredRows();
       els.productCount.textContent = numberFormatter.format(rows.length);
       els.stockCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock).length);
       els.discountCount.textContent = numberFormatter.format(rows.filter((row) => row.inStock && row.delta !== null && row.delta < 0).length);
@@ -1254,7 +1323,7 @@
 
       state.filtered.sort(getSorter());
       state.visibleCount = Math.min(Math.max(state.visibleCount, LOAD_BATCH_SIZE), state.filtered.length || LOAD_BATCH_SIZE);
-      updateStats();
+      updateStats(baseRows);
       await render();
     }
 
@@ -1264,7 +1333,7 @@
       const maxPrice = parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice);
 
       return state.rows.filter((row) => {
-        const matchesQuery = !query || row.name.toLowerCase().includes(query) || row.code.toLowerCase().includes(query);
+        const matchesQuery = !query || row.searchText.includes(query);
         const matchesMinPrice = minPrice === null || (row.price !== null && row.price >= minPrice);
         const matchesMaxPrice = maxPrice === null || (row.price !== null && row.price <= maxPrice);
         return matchesQuery && matchesMinPrice && matchesMaxPrice;
@@ -1275,9 +1344,6 @@
       const byName = (a, b) => a.name.localeCompare(b.name, "ko-KR") || a.code.localeCompare(b.code);
       const direction = state.sortDir === "asc" ? 1 : -1;
 
-      if (state.sortKey === "name") {
-        return (a, b) => direction * byName(a, b);
-      }
       if (state.sortKey === "priceTimestamp") {
         return (a, b) => direction * compareDates(a.priceTimestamp, b.priceTimestamp) || byName(a, b);
       }
@@ -1319,8 +1385,11 @@
     }
 
     async function render() {
+      const renderId = state.renderId + 1;
+      state.renderId = renderId;
       const pageRows = state.filtered.slice(0, state.visibleCount);
       const alertCodes = await getAlertCodes();
+      if (renderId !== state.renderId) return;
       els.rows.innerHTML = pageRows.map((row) => renderRow(row, alertCodes)).join("");
       els.empty.hidden = state.filtered.length !== 0;
 
@@ -1346,6 +1415,14 @@
       if (remaining < 500) loadMoreRows();
     }
 
+    function scheduleSearchFilter() {
+      window.clearTimeout(searchFilterTimer);
+      searchFilterTimer = window.setTimeout(() => {
+        state.visibleCount = LOAD_BATCH_SIZE;
+        applyFilters();
+      }, SEARCH_DEBOUNCE_MS);
+    }
+
     function setSort(key, dir, shouldUpdateUrl) {
       const previousKey = state.sortKey;
       const previousDir = state.sortDir;
@@ -1366,10 +1443,6 @@
       if (shouldUpdateUrl !== false) updateUrlState();
     }
 
-    function defaultSortDir(key) {
-      return key === "name" ? "asc" : "desc";
-    }
-
     function updateSortButtons() {
       els.sortButtons.forEach((button) => {
         const active = button.dataset.sortKey === state.sortKey;
@@ -1388,7 +1461,6 @@
         renderImage(row),
         "<div class=\"product-text\"><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code-row\"><span class=\"code\">" + escapeHtml(row.code || "-") + "</span>" + stockChip(row) + "</div></div>",
         "</a></td>",
-        "<td class=\"num\" data-label=\"기준가\">" + money(row.basePrice) + "<span class=\"subtext\">&nbsp;</span></td>",
         "<td class=\"num\" data-label=\"현재가\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
         "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
         "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
@@ -1398,15 +1470,20 @@
     }
 
     function openDb() {
-      return new Promise((resolve, reject) => {
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = () => {
           const db = request.result;
           if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE);
         };
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+          dbPromise = null;
+          reject(request.error);
+        };
       });
+      return dbPromise;
     }
 
     async function getDbValue(key, fallback) {
@@ -1870,7 +1947,7 @@
         els.maxPriceInput.value = String(Number.isFinite(maxValue) ? Math.min(state.defaultMaxPrice, Math.max(0, maxValue)) : state.defaultMaxPrice);
       }
       clampPriceInputs();
-      if (["name", "basePrice", "price", "discountRate", "priceTimestamp"].includes(sortKey)) {
+      if (["price", "discountRate", "priceTimestamp"].includes(sortKey)) {
         state.sortKey = sortKey;
         state.sortDir = sortDir === "asc" ? "asc" : "desc";
       }
@@ -1900,8 +1977,7 @@
     }
 
     els.searchInput.addEventListener("input", () => {
-      state.visibleCount = LOAD_BATCH_SIZE;
-      applyFilters();
+      scheduleSearchFilter();
     });
     els.minPriceInput.addEventListener("input", () => {
       clampPriceInputs();
