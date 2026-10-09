@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>코스트코 온라인몰 할인 추적기</title>
-  <meta name="description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 한 화면에서 검색, 필터, 정렬해 비교합니다.">
+  <meta name="description" content="코스트코 상품의 현재가, 할인율과 할인 시작일을 검색하고 비교합니다.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f766e">
   <meta name="mobile-web-app-capable" content="yes">
@@ -15,11 +15,11 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:title" content="코스트코 온라인몰 할인 추적기">
-  <meta property="og:description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 검색하고 비교합니다.">
+  <meta property="og:description" content="코스트코 상품의 현재가, 할인율과 할인 시작일을 검색하고 비교합니다.">
   <meta property="og:site_name" content="코스트코 온라인몰 할인 추적기">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="코스트코 온라인몰 할인 추적기">
-  <meta name="twitter:description" content="Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 검색하고 비교합니다.">
+  <meta name="twitter:description" content="코스트코 상품의 현재가, 할인율과 할인 시작일을 검색하고 비교합니다.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -28,339 +28,156 @@
       "applicationCategory": "ShoppingApplication",
       "operatingSystem": "Any",
       "inLanguage": "ko-KR",
-      "description": "Costco 상품의 현재가, 기준가, 할인율과 가격 이력을 검색하고 비교하는 정적 웹 애플리케이션입니다."
+      "description": "코스트코 상품의 현재가, 할인율과 수집 이력에서 확인한 할인 시작일을 비교하는 웹 애플리케이션입니다."
     }
   </script>
   <style>
-    :root {
-      color-scheme: light;
-      --bg: #f4f6f5;
-      --surface: #ffffff;
-      --surface-2: #edf3f0;
-      --text: #182c28;
-      --muted: #61716c;
-      --line: #dfe7e3;
-      --accent: #0f766e;
-      --accent-2: #c2410c;
-      --ok: #087457;
-      --warn: #a85b17;
-      --bad: #b33434;
-      --shadow: 0 4px 20px rgba(24, 44, 40, .035);
-    }
+    :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-2: #f4f6f5; --text: #202b27; --muted: #748079; --line: #e8ece9; --accent: #0f766e; --ok: #0f766e; --bad: #b33434; }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
-    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
     body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
     button, input, select { font: inherit; }
-    button, .button-link { min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 650; transition: background .15s, border-color .15s; }
-    button:hover, .button-link:hover { background: var(--surface-2); border-color: #bccfc5; }
-    button:disabled { cursor: not-allowed; opacity: .5; }
-    button.primary, .button-link.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    button.primary:hover, .button-link.primary:hover { background: #095d57; }
-    a { color: var(--accent); }
-    :focus-visible { outline: 3px solid #34958b; outline-offset: 3px; }
-    input, select { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text); font-size: 14px; }
-    input:hover, select:hover { border-color: #a9bdb4; }
+    button { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--text); font-size: 12px; cursor: pointer; }
+    button:hover { background: var(--surface-2); }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    input, select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--text); font-size: 13px; }
     input:focus, select:focus { border-color: var(--accent); }
-    input::placeholder { color: #82918b; }
-    .shell { width: min(1220px, 100%); margin: 0 auto; padding: 0 28px 40px; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 88px; border-bottom: 1px solid var(--line); }
-    .brand { display: flex; align-items: center; gap: 11px; }
-    .brand img { width: 38px; height: 38px; border-radius: 10px; }
-    .brand-wordmark { font-size: 15px; font-weight: 800; letter-spacing: -.04em; }
-    .brand-note { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-    .section-nav { display: flex; gap: 8px; }
-    .section-nav a { padding: 9px 13px; border-radius: 9px; font-size: 13px; font-weight: 650; text-decoration: none; color: var(--muted); }
-    .section-nav a:hover { background: var(--surface-2); color: var(--accent); }
-    .intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 34px 0 30px; }
-    .eyebrow { margin: 0 0 10px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
-    h1 { margin: 0; font-size: clamp(28px, 3.4vw, 40px); font-weight: 800; letter-spacing: -.055em; line-height: 1.25; }
-    .title-button { display: inline; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left; letter-spacing: inherit; }
+    input::placeholder { color: var(--muted); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .shell { width: min(1120px, 100%); margin: 0 auto; padding: 0 24px 32px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 70px; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -.035em; }
+    .title-button { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; }
     .title-button:hover { background: none; }
-    .intro-description { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
-    .meta { font-size: 12px; color: var(--muted); }
-    #meta { margin-top: 12px; display: flex; align-items: center; gap: 6px; }
-    #meta::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-    .summary { display: grid; grid-template-columns: repeat(3, auto); gap: 24px; padding: 22px 26px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-    .summary-item + .summary-item { border-left: 1px solid var(--line); padding-left: 24px; }
-    .summary-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 7px; }
-    .summary-value { font-size: 25px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-    .summary-value.accent { color: var(--accent); }
-    .summary-unit { margin-left: 3px; font-size: 12px; color: var(--muted); font-weight: 500; }
-    .online-events { padding: 20px; margin-bottom: 32px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
-    .online-events-header, .online-events-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.035em; }
-    .section-label { display: block; margin-bottom: 4px; color: var(--accent); font-size: 10px; letter-spacing: .1em; font-weight: 750; }
-    .online-events h2 { font-size: 17px; }
-    .online-events-actions { gap: 8px; }
-    .online-events-actions a { font-size: 12px; text-decoration: none; white-space: nowrap; padding: 8px 0; }
-    .online-events-actions button { min-height: 34px; padding: 0 10px; font-size: 12px; border-radius: 8px; }
-    #onlineEventsStatus { margin: 8px 0 14px; }
+    .refresh-button { min-height: 40px; width: 40px; border: 0; font-size: 23px; color: var(--muted); }
+    .online-events { margin-bottom: 26px; }
+    .event-status { display: flex; align-items: center; gap: 10px; }
+    #onlineEventsStatus { margin: 0; font-size: 12px; color: var(--muted); }
     #onlineEventsStatus[data-error] { color: var(--bad); }
-    .online-events-content { display: grid; gap: 14px; min-width: 0; }
+    #onlineEventsStatus a { color: var(--accent); }
+    .online-events-content { display: grid; gap: 16px; min-width: 0; }
     .online-event-group { min-width: 0; }
-    .online-event-heading { position: absolute; width: 1px; height: 1px; margin: -1px; clip-path: inset(50%); overflow: hidden; }
-    .online-event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-width: 0; }
-    .online-event-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 11px; text-decoration: none; color: var(--text); transition: border-color .15s, box-shadow .15s; }
-    .online-event-card:hover { border-color: #80b6a8; box-shadow: 0 5px 14px rgba(24, 44, 40, .07); }
-    .online-event-card img { display: block; width: 100%; height: 96px; object-fit: contain; background: #f6f8f7; }
-    .online-event-body { padding: 11px 12px 12px; min-width: 0; overflow-wrap: anywhere; }
-    .online-event-title { margin: 5px 0 7px; font-size: 13px; font-weight: 750; line-height: 1.45; }
-    .online-event-category { color: var(--muted); font-size: 11px; margin: 6px 0 0; }
-    .online-event-date { margin: 6px 0 0; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-    .online-event-badge { display: inline-flex; padding: 2px 5px; border-radius: 4px; background: #eaf5ef; color: #14664f; font-size: 10px; font-weight: 750; }
-    .event-scroll-hint { display: none; color: var(--muted); font-size: 11px; margin: 9px 0 0; }
-    .products-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 16px; }
-    .section-description { color: var(--muted); font-size: 13px; margin: 5px 0 0; }
-    .text-button { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--accent); font-size: 12px; }
-    .text-button:hover { background: none; text-decoration: underline; }
-    .toolbar { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, .85fr); gap: 16px 26px; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
-    .field label, .field-label, .price-range legend { display: block; color: var(--muted); margin: 0 0 7px; font-size: 12px; font-weight: 650; }
-    .search-field { position: relative; }
+    .online-event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; min-width: 0; }
+    .online-event-card { display: block; min-width: 0; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+    .online-event-card img { display: block; width: 100%; height: 126px; object-fit: contain; background: #f6f7f6; border-radius: 5px; }
+    .online-event-body { padding: 9px 0 0; min-width: 0; }
+    .online-event-title { display: block; font-size: 13px; font-weight: 650; line-height: 1.5; }
+    .online-event-card:hover .online-event-title { color: var(--accent); }
+    .online-event-date { display: block; margin-top: 5px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 12px 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
     .search-control { position: relative; }
-    .search-icon { position: absolute; left: 14px; top: 14px; width: 18px; height: 18px; pointer-events: none; color: var(--muted); }
-    #searchInput { padding-left: 42px; padding-right: 43px; background: #f8faf9; }
+    .search-icon { position: absolute; left: 12px; top: 12px; width: 17px; height: 17px; pointer-events: none; color: var(--muted); }
+    #searchInput { padding-left: 37px; padding-right: 38px; }
     #searchInput::-webkit-search-cancel-button { -webkit-appearance: none; }
-    #searchClearButton { position: absolute; right: 5px; top: 5px; padding: 0; width: 36px; min-height: 36px; border: 0; background: none; color: var(--muted); font-size: 22px; font-weight: 400; }
+    #searchClearButton { position: absolute; right: 3px; top: 3px; min-height: 34px; width: 34px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 21px; }
     .price-range { margin: 0; padding: 0; border: 0; min-width: 0; }
-    .price-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+    .price-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 7px; }
     .price-input { position: relative; }
-    .price-input input { padding-right: 30px; font-variant-numeric: tabular-nums; }
-    .price-input span { position: absolute; right: 12px; top: 13px; font-size: 12px; color: var(--muted); pointer-events: none; }
-    .range-divider { color: #91a099; }
-    .filter-bottom { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 14px; align-items: center; padding-top: 14px; border-top: 1px solid #edf1ef; }
-    .check-group { display: flex; flex-wrap: wrap; gap: 9px; }
-    .check-filter { display: inline-flex; gap: 7px; align-items: center; padding: 7px 11px; min-height: 38px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 12px; font-weight: 650; cursor: pointer; }
-    .check-filter:has(input:checked) { background: #ecf5f0; border-color: #bbd9cd; color: #125e4c; }
-    .check-filter input { width: 15px; min-height: 15px; height: 15px; margin: 0; padding: 0; accent-color: var(--accent); }
-    #resetButton { min-height: 36px; font-size: 12px; border: 0; background: none; color: var(--muted); padding: 0 6px; }
+    .price-input input { padding-right: 27px; font-variant-numeric: tabular-nums; }
+    .price-input span { position: absolute; right: 10px; top: 11px; color: var(--muted); font-size: 12px; pointer-events: none; }
+    .range-divider { color: var(--muted); }
+    .filter-bottom { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .check-group { display: flex; flex-wrap: wrap; gap: 16px; }
+    .check-filter { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; min-height: 32px; }
+    .check-filter:has(input:checked) { color: var(--text); }
+    .check-filter input { width: 14px; min-height: 14px; height: 14px; margin: 0; padding: 0; accent-color: var(--accent); }
+    #resetButton { border: 0; color: var(--muted); padding-right: 0; background: none; }
     #resetButton:hover { color: var(--accent); }
-    .results-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0 13px; }
-    .result-count { font-size: 14px; font-weight: 750; }
-    .result-count strong { color: var(--accent); }
-    .filter-summary { color: var(--muted); font-size: 11px; margin-top: 3px; }
-    .sort-control { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .sort-control label { font-size: 12px; color: var(--muted); }
-    .sort-control select { width: 152px; min-height: 38px; font-size: 12px; border-radius: 8px; }
-    .status { display: flex; align-items: center; gap: 9px; padding: 14px 16px; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; }
-    .status.error { border-color: #edd0ca; background: #fff4f0; color: var(--bad); }
-    .spinner { flex-shrink: 0; width: 16px; height: 16px; border: 2px solid #c9d8d1; border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    .results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 10px; font-size: 12px; color: var(--muted); }
+    #sortSelect { width: 148px; min-height: 36px; font-size: 12px; }
+    .status { display: flex; align-items: center; gap: 8px; padding: 10px 0 16px; font-size: 12px; color: var(--muted); }
+    .status.error { color: var(--bad); }
+    .spinner { width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 17px 20px; border-bottom: 1px solid #e9eeeb; text-align: left; vertical-align: middle; }
-    th { background: #f8faf9; color: var(--muted); font-size: 11px; font-weight: 650; white-space: nowrap; }
-    tbody tr:last-child td { border-bottom: 0; }
-    tbody tr:hover { background: #fbfdfc; }
-    .sort-button { display: inline-flex; align-items: center; justify-content: inherit; gap: 5px; width: 100%; padding: 0; min-height: 24px; border: 0; background: none; color: inherit; font: inherit; }
-    .sort-button:hover { background: none; color: var(--accent); }
-    th.num .sort-button { justify-content: flex-end; }
-    .sort-button::after { content: "↕"; color: #92a29a; }
-    .sort-button[aria-sort="ascending"]::after { content: "↑"; color: var(--accent); }
-    .sort-button[aria-sort="descending"]::after { content: "↓"; color: var(--accent); }
-    .product { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; color: inherit; text-decoration: none; max-width: 480px; }
-    .product:hover .name { color: var(--accent); }
-    .thumb { width: 64px; height: 64px; border: 1px solid #edf0ee; border-radius: 9px; background: #fafbf9; object-fit: contain; padding: 3px; }
-    .thumb.missing { display: grid; place-items: center; color: var(--muted); font-size: 10px; }
-    .name { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; line-height: 1.55; }
-    .product-text { min-width: 0; }
-    .code-row { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
-    .code { color: #74847c; font-size: 10px; font-variant-numeric: tabular-nums; }
-    .code-row .chip { padding: 1px 5px; min-height: 17px; font-size: 10px; }
+    th, td { padding: 17px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th { font-size: 11px; font-weight: 500; color: var(--muted); padding-top: 10px; padding-bottom: 10px; }
+    th:first-child, td:first-child { padding-left: 0; }
+    th:last-child, td:last-child { padding-right: 0; }
+    tbody tr:hover { background: #fafbf9; }
     .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .current-price { display: block; font-size: 18px; font-weight: 750; letter-spacing: -.035em; }
-    .base-price { display: block; margin-bottom: 3px; font-size: 11px; color: #738279; text-decoration: line-through; }
-    .subtext { display: block; margin-top: 4px; font-size: 10px; color: var(--muted); font-weight: 400; }
-    .discount-value { display: inline-flex; padding: 3px 8px; border-radius: 6px; font-size: 15px; font-weight: 750; }
-    .delta.down .discount-value { background: #eaf6ef; color: #087457; }
-    .delta.up .discount-value { background: #fff2ed; color: var(--bad); }
-    .savings { color: var(--ok); font-size: 11px; }
-    .chip { display: inline-flex; align-items: center; padding: 2px 7px; min-height: 22px; border-radius: 4px; background: #edf6f0; color: var(--ok); font-size: 11px; font-weight: 650; white-space: nowrap; }
-    .chip.off { background: #fff2ed; color: var(--bad); }
-    .chip.dim { background: #f0f3f1; color: var(--muted); }
-    .delta.up { color: var(--bad); }
-    .delta.down { color: var(--ok); }
-    .history-button, .alert-button { min-height: 34px; padding: 0 10px; font-size: 11px; white-space: nowrap; border-radius: 7px; }
-    .history-count { color: var(--muted); font-size: 10px; font-weight: 500; margin-left: 4px; }
-    .alert-button.active { background: #ecf5ef; border-color: #b7d8ca; color: var(--accent); }
-    .empty { padding: 48px 18px; text-align: center; color: var(--muted); }
-    .empty-title { margin: 0 0 6px; color: var(--text); font-size: 16px; font-weight: 750; }
-    .empty p { font-size: 13px; margin: 0 0 18px; }
-    .list-footer { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 0 0; }
-    #displayCount { color: var(--muted); font-size: 12px; }
-    #loadMoreButton { width: min(280px, 100%); }
-    .data-note { margin: 24px 0 0; font-size: 11px; line-height: 1.8; color: var(--muted); text-align: center; }
-    .site-footer { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--muted); }
-    .site-footer a { text-decoration: none; }
-    .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(14, 34, 28, .48); backdrop-filter: blur(4px); }
-    .dialog { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(920px, 100%); max-height: min(760px, calc(100dvh - 48px)); overflow: hidden; border-radius: 18px; background: var(--surface); box-shadow: 0 24px 70px rgba(14, 34, 28, .2); }
-    .dialog-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 23px; border-bottom: 1px solid var(--line); align-items: start; }
-    .dialog-title { font-size: 18px; line-height: 1.4; margin: 0; }
-    .dialog-subtitle { margin-top: 5px; font-size: 12px; color: var(--muted); }
-    .dialog-body { overflow: auto; }
-    .chart-panel { padding: 22px; border-bottom: 1px solid var(--line); }
-    .chart-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 13px; color: var(--muted); font-size: 12px; }
-    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
-    .legend-swatch { width: 18px; height: 3px; border-radius: 10px; background: var(--accent); }
-    .legend-swatch.base { background: var(--accent-2); }
-    .history-chart { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbfdfc; }
-    .history-table th, .history-table td { padding: 13px 22px; }
-    @media (max-width: 1040px) {
-      .intro { grid-template-columns: 1fr; gap: 22px; }
-      .summary { width: 100%; grid-template-columns: repeat(3, 1fr); padding: 16px 22px; }
-      .summary-value { font-size: 23px; }
-      .toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
-      th, td { padding: 15px 14px; }
-      .product { grid-template-columns: 54px minmax(0, 1fr); gap: 10px; }
-      .thumb { width: 54px; height: 54px; }
-    }
+    .sort-button { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; border: 0; background: none; font: inherit; color: inherit; padding: 0; min-height: 24px; }
+    .sort-button:hover { background: none; color: var(--accent); }
+    .sort-button::after { content: "↕"; color: #9aa39d; }
+    th[aria-sort="ascending"] .sort-button::after { content: "↑"; color: var(--accent); }
+    th[aria-sort="descending"] .sort-button::after { content: "↓"; color: var(--accent); }
+    .product { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 13px; max-width: 510px; color: inherit; text-decoration: none; }
+    .product:hover .name { color: var(--accent); }
+    .thumb { width: 52px; height: 52px; object-fit: contain; background: #fafbf9; border-radius: 4px; padding: 2px; }
+    .thumb.missing { display: grid; place-items: center; color: var(--muted); font-size: 9px; }
+    .name { font-size: 14px; line-height: 1.5; font-weight: 500; overflow-wrap: anywhere; }
+    .current-price { font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
+    .discount-value { font-size: 15px; font-weight: 600; color: var(--accent); }
+    .delta.up .discount-value { color: var(--bad); }
+    .discount-start { font-size: 12px; color: var(--muted); }
+    .empty { text-align: center; padding: 38px 0; font-size: 13px; color: var(--muted); }
+    .empty p { margin: 0 0 15px; }
+    #loadMoreButton { display: block; width: min(240px, 100%); margin: 20px auto 0; }
     @media (max-width: 900px) {
-      .table-wrap { background: none; border: 0; border-radius: 0; overflow: visible; box-shadow: none; }
+      .online-event-grid { display: flex; gap: 14px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+      .online-event-card { flex: 0 0 240px; scroll-snap-align: start; }
+      .toolbar { grid-template-columns: minmax(0, 1fr) 250px; }
       .table-wrap > table, .table-wrap > table > tbody, .table-wrap > table > tbody > tr, .table-wrap > table > tbody > tr > td { display: block; }
       .table-wrap > table > thead { display: none; }
-      #rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      #rows > tr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+      #rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+      #rows > tr { display: grid; grid-template-columns: 1fr .6fr 1.2fr; gap: 13px 10px; padding: 18px 0; border-bottom: 1px solid var(--line); }
       #rows > tr > td { padding: 0; border: 0; }
       #rows > tr > td:first-child { grid-column: 1 / -1; }
-      #rows td[data-label="현재가"], #rows td[data-label="할인율"] { text-align: left; }
-      #rows td[data-label="할인율"] { text-align: right; }
-      #rows td[data-label="이력"], #rows td[data-label="알림"] { align-self: end; }
-      #rows td[data-label="알림"] { text-align: right; }
-      #rows .history-button, #rows .alert-button { min-height: 38px; }
-      #rows .product { grid-template-columns: 58px minmax(0, 1fr); gap: 11px; }
-      #rows .thumb { width: 58px; height: 58px; }
-      .online-event-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .online-event-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; }
-      .online-event-card img { width: 96px; height: 100%; min-height: 100px; }
-      .history-count { display: none; }
+      #rows td[data-label="현재가"] { text-align: left; }
+      #rows td[data-label="할인율"] { text-align: center; }
+      #rows td[data-label="할인 시작일"] { text-align: right; align-self: end; }
+      #rows td[data-label="할인 시작일"]::before { content: "할인 시작일"; display: block; color: var(--muted); font-size: 10px; margin-bottom: 3px; }
+      .current-price { font-size: 17px; }
+      .discount-start { font-size: 11px; }
     }
     @media (max-width: 640px) {
-      html { scroll-padding-top: 16px; }
-      .shell { padding: 0 16px 28px; }
-      .topbar { min-height: 72px; gap: 8px; }
-      .brand-wordmark { font-size: 13px; }
-      .brand img { width: 32px; height: 32px; }
-      .brand-note { font-size: 10px; }
-      .section-nav { gap: 2px; }
-      .section-nav a { font-size: 11px; padding: 8px; }
-      .intro { padding: 26px 0 22px; gap: 20px; }
-      h1 { font-size: 29px; }
-      .intro-description { font-size: 13px; line-height: 1.7; max-width: 290px; }
-      .summary { padding: 14px; gap: 12px; border-radius: 12px; }
-      .summary-item + .summary-item { padding-left: 12px; }
-      .summary-label { font-size: 10px; margin-bottom: 4px; }
-      .summary-value { font-size: 21px; }
-      .summary-unit { font-size: 10px; }
-      .online-events { padding: 15px; margin-bottom: 26px; border-radius: 13px; }
-      .online-events-header { align-items: center; gap: 8px; }
-      .online-events h2 { font-size: 15px; }
-      .online-events-actions { gap: 8px; }
-      .online-events-actions a { display: none; }
-      .online-events-actions button { min-height: 36px; padding: 0 9px; font-size: 11px; }
-      #onlineEventsStatus { margin: 8px 0 12px; font-size: 11px; }
-      .online-event-grid { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 8px; scrollbar-width: thin; }
-      .online-event-card { display: grid; grid-template-columns: 88px minmax(0, 1fr); flex: 0 0 calc(100% - 26px); scroll-snap-align: start; }
-      .online-event-card img { width: 88px; min-height: 128px; }
+      .shell { padding: 0 16px 26px; }
+      .topbar { min-height: 58px; margin-bottom: 12px; }
+      h1 { font-size: 16px; }
+      .online-events { margin-bottom: 20px; }
+      .online-event-card { flex-basis: 230px; }
+      .online-event-card img { height: 110px; }
       .online-event-title { font-size: 12px; }
-      .online-event-body { padding: 10px; }
-      .event-scroll-hint { display: block; }
-      .products-heading { margin-bottom: 14px; }
-      h2 { font-size: 19px; }
-      .section-description { font-size: 12px; }
-      .toolbar { grid-template-columns: 1fr; padding: 16px; gap: 15px; border-radius: 13px; }
-      .price-range legend { font-size: 11px; }
-      .filter-bottom { padding-top: 12px; gap: 8px; }
-      .check-group { gap: 6px; }
-      .check-filter { font-size: 11px; padding: 7px 8px; min-height: 38px; }
-      #resetButton { font-size: 11px; flex-shrink: 0; }
-      .results-bar { padding-top: 19px; gap: 8px; }
-      .sort-control label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-      .sort-control select { width: 136px; }
-      .result-count { font-size: 13px; }
-      .filter-summary { font-size: 10px; }
-      #rows { grid-template-columns: 1fr; gap: 10px; }
-      #rows > tr { padding: 16px; }
-      #rows .product { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
-      #rows .thumb { width: 64px; height: 64px; }
-      .current-price { font-size: 21px; }
-      .discount-value { font-size: 17px; }
-      .name { font-size: 14px; }
-      .status { flex-wrap: wrap; font-size: 12px; }
-      .modal { padding: 0; align-items: end; }
-      .dialog { width: 100%; max-height: 90dvh; border-radius: 18px 18px 0 0; }
-      .dialog-head { padding: 19px 17px; gap: 12px; }
-      .dialog-title { font-size: 16px; }
-      .dialog-body { padding-bottom: env(safe-area-inset-bottom); }
-      .chart-panel { padding: 17px; }
-      .history-table th, .history-table td { padding: 10px 7px; font-size: 11px; white-space: normal; }
-      .history-table th:first-child, .history-table td:first-child { padding-left: 17px; }
-      .site-footer { font-size: 10px; flex-wrap: wrap; }
+      .toolbar { grid-template-columns: 1fr; gap: 10px; padding-bottom: 12px; }
+      .filter-bottom { gap: 8px; }
+      .check-group { gap: 14px; }
+      .check-filter { font-size: 11px; }
+      #resetButton { font-size: 11px; }
+      .results-bar { padding-top: 12px; }
+      #sortSelect { width: 142px; }
+      #rows { grid-template-columns: 1fr; }
+      #rows > tr { padding: 16px 0; gap: 12px 10px; }
+      .current-price { font-size: 19px; }
+      .discount-value { font-size: 16px; }
+      .discount-start { font-size: 12px; }
+      .event-status { flex-wrap: wrap; }
     }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
-      <div class="brand">
-        <img src="icon.svg" alt="" width="38" height="38">
-        <div class="brand-wordmark">코스트코 할인 추적기<span class="brand-note">온라인몰 가격을 한눈에</span></div>
-      </div>
-      <nav class="section-nav" aria-label="화면 이동">
-        <a href="#productsSection">상품 찾기</a>
-        <a href="#eventsSection">이벤트</a>
-      </nav>
+      <h1><button id="titleResetButton" class="title-button" type="button" title="기본 검색 조건으로 돌아가기">코스트코 할인</button></h1>
+      <span class="sr-only" id="meta" role="status">상품 정보를 불러오는 중입니다.</span>
+      <button id="productsRefreshButton" class="refresh-button" type="button" aria-label="가격과 이벤트 새로고침" title="새로고침">↻</button>
     </header>
 
-    <section class="intro" aria-labelledby="pageTitle">
-      <div>
-        <p class="eyebrow">가격 비교 · 할인 혜택</p>
-        <h1 id="pageTitle"><button class="title-button" id="titleResetButton" type="button" title="기본 검색 조건으로 돌아가기">코스트코 온라인몰,<br>가격을 한눈에.</button></h1>
-        <p class="intro-description">현재 가격부터 할인율, 가격 변동까지.<br>구매 전, 코스트코 온라인몰 가격을 비교해 보세요.</p>
-        <div class="meta" id="meta" role="status">상품 정보를 불러오는 중입니다.</div>
-      </div>
-      <div class="summary" aria-label="전체 상품 현황">
-        <div class="summary-item"><span class="summary-label">추적 중인 상품</span><span class="summary-value" id="summaryProducts">—</span><span class="summary-unit">개</span></div>
-        <div class="summary-item"><span class="summary-label">판매 중 할인 상품</span><span class="summary-value accent" id="summaryDeals">—</span><span class="summary-unit">개</span></div>
-        <div class="summary-item"><span class="summary-label">판매 상품 최대 할인</span><span class="summary-value accent" id="summarySavings">—</span><span class="summary-unit">%</span></div>
-      </div>
+    <section class="online-events" id="eventsSection" aria-label="현재 이벤트">
+      <div class="event-status"><p id="onlineEventsStatus" role="status" aria-live="polite">이벤트를 불러오는 중입니다.</p><button id="onlineEventsRefresh" type="button" hidden>다시 시도</button></div>
+      <div id="onlineEventsContent" class="online-events-content" aria-busy="true"></div>
     </section>
 
-    <section class="online-events" id="eventsSection" aria-labelledby="onlineEventsTitle">
-      <div class="online-events-header">
-        <div><span class="section-label">ONLINE EVENTS</span><h2 id="onlineEventsTitle">지금 진행 중인 이벤트</h2></div>
-        <div class="online-events-actions">
-          <a href="https://www.costco.co.kr/OnlineEvent" target="_blank" rel="noopener noreferrer">공식 페이지 ↗</a>
-          <button id="onlineEventsRefresh" type="button" aria-label="현재 이벤트 새로고침">새로고침</button>
-          <button id="onlineEventsToggle" type="button" aria-expanded="true" aria-controls="onlineEventsBody">접기</button>
-        </div>
-      </div>
-      <p id="onlineEventsStatus" class="meta" role="status" aria-live="polite">이벤트를 불러오는 중입니다.</p>
-      <div id="onlineEventsBody">
-        <div id="onlineEventsContent" class="online-events-content" aria-busy="true"></div>
-        <p class="event-scroll-hint">옆으로 넘겨 다른 이벤트도 확인하세요 →</p>
-      </div>
-    </section>
-
-    <section id="productsSection" aria-labelledby="productsTitle">
-      <div class="products-heading">
-        <div><span class="section-label">PRICE EXPLORER</span><h2 id="productsTitle">어떤 상품을 찾으세요?</h2><p class="section-description">원하는 상품의 가격과 할인 혜택을 비교하세요.</p></div>
-        <button class="text-button" id="productsRefreshButton" type="button">가격 새로고침 ↻</button>
-      </div>
+    <section id="productsSection" aria-label="상품 검색과 가격">
       <section class="toolbar" aria-label="상품 검색과 필터">
-        <div class="field search-field">
-          <label for="searchInput">상품 검색</label>
-          <div class="search-control">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-            <input id="searchInput" type="search" placeholder="상품명 또는 상품 코드로 검색" autocomplete="off">
-            <button id="searchClearButton" type="button" aria-label="검색어 지우기" hidden>×</button>
-          </div>
+        <div class="search-control">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input id="searchInput" type="search" aria-label="상품명 또는 상품 코드 검색" placeholder="상품명 또는 코드 검색" autocomplete="off">
+          <button id="searchClearButton" type="button" aria-label="검색어 지우기" hidden>×</button>
         </div>
         <fieldset class="price-range">
-          <legend>가격 범위</legend>
+          <legend class="sr-only">가격 범위</legend>
           <div class="price-inputs">
             <div class="price-input"><input id="minPriceInput" aria-label="최소 가격" type="number" min="0" step="100" inputmode="numeric" value="0"><span>원</span></div>
             <span class="range-divider" aria-hidden="true">–</span>
@@ -372,60 +189,25 @@
             <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
             <label class="check-filter"><input id="discountOnlyInput" type="checkbox" checked> 할인 상품만</label>
           </div>
-          <button id="resetButton" type="button">초기화 ↺</button>
+          <button id="resetButton" type="button">초기화</button>
         </div>
       </section>
 
       <div class="results-bar">
-        <div><div class="result-count" id="resultCount" role="status" aria-live="polite">상품을 찾고 있습니다.</div><div id="filterSummary" class="filter-summary">판매 중인 할인 상품을 보여드립니다.</div></div>
-        <div class="sort-control"><label for="sortSelect">정렬</label><select id="sortSelect"><option value="latest">최근 확인한 순</option><option value="price-asc">가격 낮은 순</option><option value="price-desc">가격 높은 순</option><option value="discountRate-desc">할인율 높은 순</option><option value="discountRate-asc">할인율 낮은 순</option></select></div>
+        <span id="resultCount" role="status" aria-live="polite"></span>
+        <select id="sortSelect" aria-label="상품 정렬"><option value="latest">최근 확인한 순</option><option value="price-asc">가격 낮은 순</option><option value="price-desc">가격 높은 순</option><option value="discountRate-desc">할인율 높은 순</option><option value="discountRate-asc">할인율 낮은 순</option></select>
       </div>
       <div class="status" id="status" role="status" hidden></div>
-      <section class="table-wrap" aria-label="상품 가격 목록">
-        <table>
-          <thead><tr><th scope="col">상품</th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인 혜택</button></th><th scope="col">가격 이력</th><th scope="col" id="alertColumnHeader" hidden>가격 알림</th></tr></thead>
+      <div class="table-wrap">
+        <table aria-label="상품의 현재가, 할인율과 할인 시작일">
+          <thead><tr><th scope="col">상품</th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th><th scope="col" class="num">할인 시작일</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
-        <div class="empty" id="empty" hidden><div class="empty-title">조건에 맞는 상품이 없어요.</div><p>검색어를 바꾸거나 가격 범위를 넓혀 보세요.</p><button class="primary" id="clearFiltersButton" type="button">모든 상품 보기</button></div>
-      </section>
-      <div class="list-footer"><span id="displayCount"></span><button id="loadMoreButton" type="button" hidden>상품 더 보기</button></div>
-      <p class="data-note">할인율과 절약 금액은 수집한 기준가와 현재가를 비교한 값입니다.<br>상품명을 누르면 코스트코 온라인몰로 이동합니다. 최종 가격과 재고는 판매 페이지에서 확인해 주세요.</p>
-    </section>
-    <footer class="site-footer"><span>코스트코 온라인몰 할인 추적기 · 비공식 가격 비교 서비스</span><a href="https://www.costco.co.kr" target="_blank" rel="noopener noreferrer">코스트코 온라인몰 ↗</a></footer>
-  </main>
-
-  <div class="modal" id="historyModal" hidden>
-    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
-      <header class="dialog-head">
-        <div>
-          <h2 class="dialog-title" id="historyTitle">가격 이력</h2>
-          <div class="dialog-subtitle" id="historySubtitle"></div>
-        </div>
-        <button id="historyCloseButton" type="button">닫기</button>
-      </header>
-      <div class="dialog-body" tabindex="0" aria-label="가격 이력 상세, 아래로 스크롤해 이전 가격을 확인하세요">
-        <div class="chart-panel">
-          <div class="chart-legend">
-            <span class="legend-item"><span class="legend-swatch base"></span>기준가</span>
-            <span class="legend-item"><span class="legend-swatch"></span>현재가</span>
-          </div>
-          <div id="historyChart"></div>
-        </div>
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>시각</th>
-              <th class="num">기준가</th>
-              <th class="num">현재가</th>
-              <th class="num">할인율</th>
-            </tr>
-          </thead>
-          <tbody id="historyRows"></tbody>
-        </table>
-        <div class="empty" id="historyEmpty" hidden>가격 이력이 없습니다.</div>
+        <div class="empty" id="empty" hidden><p>조건에 맞는 상품이 없습니다.</p><button id="clearFiltersButton" type="button">모든 상품 보기</button></div>
       </div>
+      <button id="loadMoreButton" type="button" hidden>더 보기</button>
     </section>
-  </div>
+  </main>
 
   <script>
     "use strict";
@@ -436,13 +218,7 @@
       const content = document.getElementById("onlineEventsContent");
       const status = document.getElementById("onlineEventsStatus");
       const refresh = document.getElementById("onlineEventsRefresh");
-      const toggle = document.getElementById("onlineEventsToggle");
-      const body = document.getElementById("onlineEventsBody");
-      toggle.addEventListener("click", () => {
-        body.hidden = !body.hidden;
-        toggle.setAttribute("aria-expanded", String(!body.hidden));
-        toggle.textContent = body.hidden ? "펼치기" : "접기";
-      });
+      const section = document.getElementById("eventsSection");
 
       function safeUrl(value, image = false) {
         if (typeof value !== "string" || !value.trim()) return null;
@@ -488,10 +264,8 @@
         card.append(image);
         const body = document.createElement("div");
         body.className = "online-event-body";
-        appendText(body, "span", "online-event-badge", text(".flag"));
-        appendText(body, "p", "online-event-category", text(".cat"));
-        appendText(body, "h4", "online-event-title", title);
-        appendText(body, "p", "online-event-date", text(".date"));
+        appendText(body, "strong", "online-event-title", title);
+        appendText(body, "span", "online-event-date", text(".date"));
         card.append(body);
         return card;
       }
@@ -514,7 +288,7 @@
               for (const source of groups) {
                 const heading = source.querySelector("h2, h3")?.textContent.trim() || "";
                 if (source.id === "paid-ads" || /이번주추천상품/.test(heading.replace(/\s/g, ""))) continue;
-                const group = document.createElement("section");
+              const group = document.createElement("div");
                 group.className = "online-event-group";
                 const grid = document.createElement("div");
                 grid.className = "online-event-grid";
@@ -525,7 +299,6 @@
                   if (card) grid.append(card);
                 }
                 if (!grid.childElementCount) continue;
-                appendText(group, "h3", "online-event-heading", heading);
                 group.append(grid);
                 fragment.append(group);
               }
@@ -539,6 +312,9 @@
       async function loadEvents() {
         if (refresh.disabled) return;
         refresh.disabled = true;
+        refresh.hidden = true;
+        section.hidden = false;
+        status.hidden = false;
         content.setAttribute("aria-busy", "true");
         content.replaceChildren();
         status.textContent = "이벤트를 불러오는 중입니다.";
@@ -554,11 +330,12 @@
           });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const count = renderEvents(await response.json());
-          status.textContent = count
-            ? `현재 이벤트 ${count}건 · ${new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" }).format(new Date())} 업데이트`
-            : "표시할 이벤트가 없습니다. 공식 이벤트 페이지에서도 확인할 수 있습니다.";
+          status.textContent = "";
+          status.hidden = true;
+          section.hidden = !count;
         } catch (error) {
           content.replaceChildren();
+          refresh.hidden = false;
         status.setAttribute("data-error", "true");
           status.textContent = error.name === "AbortError"
           ? "이벤트 확인이 지연되고 있어요. 잠시 후 다시 시도해 주세요. "
@@ -577,6 +354,7 @@
       }
 
       refresh.addEventListener("click", loadEvents);
+      document.getElementById("productsRefreshButton").addEventListener("click", loadEvents);
       loadEvents();
     })();
   </script>
@@ -618,15 +396,9 @@
       sortKey: "",
       sortDir: "",
       defaultMaxPrice: 0,
-      restoredHistoryCode: "",
       isRestoring: true,
       loadedAt: null,
-      canConfigureNotifications: false,
-      notificationPermissionPromptDismissed: false,
-      loading: false,
-      historyTrigger: null,
-      previousBodyOverflow: "",
-      renderId: 0
+      loading: false
     };
 
     const LOAD_BATCH_SIZE = 20;
@@ -646,27 +418,14 @@
       discountOnlyInput: document.getElementById("discountOnlyInput"),
       resetButton: document.getElementById("resetButton"),
       titleResetButton: document.getElementById("titleResetButton"),
-      alertColumnHeader: document.getElementById("alertColumnHeader"),
-      historyModal: document.getElementById("historyModal"),
-      historyTitle: document.getElementById("historyTitle"),
-      historySubtitle: document.getElementById("historySubtitle"),
-      historyChart: document.getElementById("historyChart"),
-      historyRows: document.getElementById("historyRows"),
-      historyEmpty: document.getElementById("historyEmpty"),
-      historyCloseButton: document.getElementById("historyCloseButton"),
       sortButtons: document.querySelectorAll("[data-sort-key]")
     };
     Object.assign(els, {
       resultCount: document.getElementById("resultCount"),
-      filterSummary: document.getElementById("filterSummary"),
       sortSelect: document.getElementById("sortSelect"),
       searchClearButton: document.getElementById("searchClearButton"),
       clearFiltersButton: document.getElementById("clearFiltersButton"),
       productsRefreshButton: document.getElementById("productsRefreshButton"),
-      summaryProducts: document.getElementById("summaryProducts"),
-      summaryDeals: document.getElementById("summaryDeals"),
-      summarySavings: document.getElementById("summarySavings"),
-      displayCount: document.getElementById("displayCount"),
       loadMoreButton: document.getElementById("loadMoreButton")
     });
 
@@ -698,10 +457,6 @@
       els.status.hidden = true;
       els.status.className = "status";
       els.status.innerHTML = "";
-    }
-
-    function showNotice(message) {
-      window.alert(message);
     }
 
     function parseCsv(text) {
@@ -788,7 +543,7 @@
         ]);
         await applyLoadedData(products, prices, basePrices);
       } catch (error) {
-        setStatus("상품 가격을 불러오지 못했습니다. 가격 새로고침을 눌러 다시 시도해 주세요.", true);
+        setStatus("상품 가격을 불러오지 못했습니다. 새로고침을 눌러 다시 시도해 주세요.", true);
         if (!state.loadedAt) {
           els.meta.textContent = "상품 정보를 확인할 수 없습니다.";
           els.resultCount.textContent = "가격 확인이 필요합니다.";
@@ -826,6 +581,7 @@
           basePrice: currentBasePrice,
           basePriceTimestamp: basePrice ? parseDate(basePrice.timestamp) : null,
           delta: currentPrice !== null && currentBasePrice !== null ? currentPrice - currentBasePrice : null,
+          discountStart: ongoingDiscountStart(state.priceHistory.get(code) || [], state.basePriceHistory.get(code) || []),
           discountRate: currentPrice !== null && currentBasePrice > 0
             ? ((currentBasePrice - currentPrice) / currentBasePrice) * 100
             : null
@@ -833,19 +589,79 @@
       });
 
       state.loadedAt = new Date();
-      updateSummary();
       state.defaultMaxPrice = Math.max(0, ...state.rows.map((row) => row.price || 0));
       await notifyPriceChanges(await detectPriceChanges(state.rows));
       await savePriceSnapshot(state.rows);
       setDefaultPriceRange();
       restoreStateFromUrl();
       await applyFilters();
-      if (state.restoredHistoryCode) openHistory(state.restoredHistoryCode, false);
       state.isRestoring = false;
       updateUrlState();
       setReadyStatus();
       els.meta.textContent = "가격 데이터 확인 · " + dateFormatter.format(state.loadedAt);
-      await updateNotificationUi();
+    }
+
+    function ongoingDiscountStart(priceHistory = [], basePriceHistory = []) {
+      const events = new Map();
+      let hasUnplacedObservation = false;
+
+      function addObservations(history, field) {
+        for (const item of history) {
+          const timestamp = item?.timestamp;
+          const time = timestamp == null || timestamp === ""
+            ? NaN
+            : timestamp instanceof Date ? timestamp.getTime() : new Date(timestamp).getTime();
+          if (!Number.isFinite(time)) {
+            hasUnplacedObservation = true;
+            continue;
+          }
+          if (!events.has(time)) events.set(time, { time });
+          const event = events.get(time);
+          if (!event[field]) event[field] = new Set();
+          // Treat null/undefined/strings as unknown rather than coercing to zero.
+          const value = typeof item.value === "number" && Number.isFinite(item.value)
+            ? item.value
+            : null;
+          event[field].add(value);
+        }
+      }
+
+      addObservations(priceHistory, "prices");
+      addObservations(basePriceHistory, "basePrices");
+
+      function singleValue(values, minimum, strictMinimum = false) {
+        if (values.size !== 1) return null;
+        const value = values.values().next().value;
+        if (value === null || (strictMinimum ? value <= minimum : value < minimum)) return null;
+        return value;
+      }
+
+      let price = null;
+      let basePrice = null;
+      let previouslyDiscounted = null;
+      let date = null;
+      let uncertain = true;
+
+      for (const event of [...events.values()].sort((a, b) => a.time - b.time)) {
+        // A price and baseline recorded together describe one atomic observation.
+        if (event.prices) price = singleValue(event.prices, 0);
+        if (event.basePrices) basePrice = singleValue(event.basePrices, 0, true);
+
+        const discounted = price === null || basePrice === null ? null : price < basePrice;
+        if (discounted === null) {
+          date = null;
+          uncertain = true;
+        } else if (!discounted) {
+          date = null;
+          uncertain = false;
+        } else if (previouslyDiscounted !== true) {
+          date = new Date(event.time);
+          uncertain = previouslyDiscounted !== false;
+        }
+        previouslyDiscounted = discounted;
+      }
+
+      return hasUnplacedObservation ? { date: null, uncertain: true } : { date, uncertain };
     }
 
     function latestByCode(rows, valueKey) {
@@ -869,7 +685,7 @@
         const code = cleanCode(row.code);
         const value = toNumber(row[valueKey]);
         const timestamp = parseDate(row.timestamp);
-        if (!code || value === null || !timestamp) return;
+        if (!code) return;
         if (!map.has(code)) map.set(code, []);
         map.get(code).push({ value, timestamp });
       });
@@ -996,12 +812,8 @@
     }
 
     async function render() {
-      const renderId = state.renderId + 1;
-      state.renderId = renderId;
       const pageRows = state.filtered.slice(0, state.visibleCount);
-      const alertCodes = await getAlertCodes();
-      if (renderId !== state.renderId) return;
-      els.rows.innerHTML = pageRows.map((row) => renderRow(row, alertCodes)).join("");
+      els.rows.innerHTML = pageRows.map(renderRow).join("");
       els.empty.hidden = state.filtered.length !== 0;
       updateResults();
       updateSortButtons();
@@ -1060,45 +872,35 @@
       });
     }
 
-    function updateSummary() {
-      const deals = state.rows.filter((row) => row.inStock && row.discountRate > 0);
-      els.summaryProducts.textContent = numberFormatter.format(state.rows.length);
-      els.summaryDeals.textContent = numberFormatter.format(deals.length);
-      const largestDiscount = deals.reduce((largest, row) => Math.max(largest, row.discountRate), 0);
-      els.summarySavings.textContent = numberFormatter.format(Math.round(largestDiscount * 10) / 10);
-    }
-
     function updateResults() {
-      els.resultCount.innerHTML = "상품 <strong>" + numberFormatter.format(state.filtered.length) + "</strong>개";
-      const conditions = [];
-      if (els.searchInput.value.trim()) conditions.push('“' + els.searchInput.value.trim() + '”');
-      if (els.inStockOnlyInput.checked) conditions.push("판매 중");
-      if (els.discountOnlyInput.checked) conditions.push("할인 상품");
-      if (parsePriceInput(els.minPriceInput.value, 0) > 0 || parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice) < state.defaultMaxPrice) conditions.push("가격 범위 적용");
-      els.filterSummary.textContent = conditions.join(" · ") || "전체 상품";
+      els.resultCount.textContent = numberFormatter.format(state.filtered.length) + "개";
       els.searchClearButton.hidden = !els.searchInput.value;
-      els.displayCount.textContent = state.filtered.length ? numberFormatter.format(Math.min(state.visibleCount, state.filtered.length)) + " / " + numberFormatter.format(state.filtered.length) + "개 표시" : "";
       els.loadMoreButton.hidden = state.visibleCount >= state.filtered.length;
     }
 
-    function renderRow(row, alertCodes) {
-      const discountClass = row.discountRate === null ? "" : row.discountRate > 0 ? " down" : row.discountRate < 0 ? " up" : "";
-      const historyCount = combinedHistory(row.code).length;
-      const alertActive = alertCodes.has(row.code);
-      const alertCell = state.canConfigureNotifications
-        ? "<td data-label=\"알림\"><button class=\"alert-button" + (alertActive ? " active" : "") + "\" type=\"button\" data-alert-code=\"" + escapeAttribute(row.code) + "\" aria-pressed=\"" + String(alertActive) + "\">" + (alertActive ? "알림 중" : "알림 설정") + "</button></td>"
-        : "";
+    function renderDiscountStart(row) {
+      if (!(row.discountRate > 0) || !row.discountStart.date) return "-";
+      const date = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit"
+      }).format(row.discountStart.date).replace(/-/g, ".");
+      const explanation = row.discountStart.uncertain
+        ? "앞선 수집 이력이 불완전해 정확한 시작일을 확인할 수 없습니다. 이 날짜에는 할인이 확인되었습니다."
+        : "수집한 가격 이력에서 현재 할인을 처음 확인한 날짜입니다. 실제 행사 시작일과 다를 수 있습니다.";
+      const text = date + (row.discountStart.uncertain ? " 또는 이전" : "");
+      return '<span class="discount-start" title="' + escapeAttribute(explanation) + '" aria-label="' + escapeAttribute(text + ". " + explanation) + '">' + escapeHtml(text) + '</span>';
+    }
 
+    function renderRow(row) {
+      const discountClass = row.discountRate === null ? "" : row.discountRate > 0 ? " down" : row.discountRate < 0 ? " up" : "";
       return [
         "<tr>",
-        "<td><a class=\"product\" href=\"" + escapeAttribute(productUrl(row.code)) + "\" target=\"_blank\" rel=\"noopener noreferrer\">",
+        '<td><a class="product" href="' + escapeAttribute(productUrl(row.code)) + '" target="_blank" rel="noopener noreferrer">',
         renderImage(row),
-        "<div class=\"product-text\"><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code-row\"><span class=\"code\">" + escapeHtml(row.code || "-") + "</span>" + stockChip(row) + "</div></div>",
+        '<span class="name">' + escapeHtml(row.name) + '</span>',
         "</a></td>",
-        "<td class=\"num\" data-label=\"현재가\">" + (row.delta < 0 && row.basePrice !== null ? "<span class=\"base-price\" aria-label=\"기준가\">" + money(row.basePrice) + "</span>" : "") + "<strong class=\"current-price\">" + money(row.price) + "</strong><span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + " 확인</span></td>",
-        "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\"><span class=\"discount-value\">" + percent(row.discountRate) + "</span>" + (row.delta < 0 ? "<span class=\"subtext savings\">" + money(-row.delta) + " 절약</span>" : "<span class=\"subtext\">기준가 대비</span>") + "</td>",
-        "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\" aria-label=\"" + escapeAttribute(row.name + " 가격 이력 보기") + "\">가격 이력<span class=\"history-count\">" + numberFormatter.format(historyCount) + "</span></button></td>",
-        alertCell,
+        '<td class="num" data-label="현재가"><strong class="current-price">' + money(row.price) + '</strong></td>',
+        '<td class="num delta' + discountClass + '" data-label="할인율"><span class="discount-value">' + percent(row.discountRate) + '</span></td>',
+        '<td class="num" data-label="할인 시작일">' + renderDiscountStart(row) + '</td>',
         "</tr>"
       ].join("");
     }
@@ -1146,40 +948,6 @@
         console.warn("알림 설정을 불러오지 못했습니다.", error);
         return new Set();
       }
-    }
-
-    async function setAlertCodes(alertCodes) {
-      await setDbValue(STORAGE_KEYS.alertCodes, [...alertCodes]);
-    }
-
-    async function toggleAlert(code) {
-      const clean = cleanCode(code);
-      if (!clean) return;
-      await updateNotificationUi();
-      if (!state.canConfigureNotifications) {
-        await render();
-        return;
-      }
-      const alertCodes = await getAlertCodes();
-      if (!alertCodes.has(clean)) {
-        const enabled = await enableNotifications();
-        if (!enabled) {
-          showNotice(Notification.permission === "default"
-            ? "브라우저 알림 권한 요청을 먼저 허용해 주세요."
-            : "알림 권한이 허용되지 않아 상품 알림을 설정하지 않았습니다.");
-          await render();
-          return;
-        }
-        alertCodes.add(clean);
-      } else {
-        alertCodes.delete(clean);
-      }
-      await setAlertCodes(alertCodes);
-      await savePriceSnapshot(state.rows);
-      await registerPeriodicPriceCheck();
-      requestServiceWorkerPriceCheck();
-      await updateNotificationUi();
-      await render();
     }
 
     async function readPriceSnapshot() {
@@ -1245,10 +1013,6 @@
       return "Notification" in window && Notification.permission === "granted";
     }
 
-    function canConfigureNotifications() {
-      return "Notification" in window && Notification.permission !== "denied";
-    }
-
     async function ensureServiceWorker() {
       if (!("serviceWorker" in navigator)) return null;
       if (state.serviceWorkerRegistration) return state.serviceWorkerRegistration;
@@ -1259,40 +1023,6 @@
         console.warn("서비스워커를 등록하지 못했습니다.", error);
         return null;
       }
-    }
-
-    async function enableNotifications() {
-      if (!("Notification" in window)) {
-        await updateNotificationUi();
-        return false;
-      }
-      if (Notification.permission === "denied") {
-        await updateNotificationUi();
-        return false;
-      }
-      if (Notification.permission === "default") {
-        if (state.notificationPermissionPromptDismissed) {
-          await updateNotificationUi();
-          return false;
-        }
-        try {
-          await Notification.requestPermission();
-          if (Notification.permission === "default") {
-            state.notificationPermissionPromptDismissed = true;
-          }
-        } catch (error) {
-          console.warn("알림 권한을 요청하지 못했습니다.", error);
-          state.notificationPermissionPromptDismissed = true;
-        }
-      }
-      if (Notification.permission === "granted") {
-        state.notificationPermissionPromptDismissed = false;
-        await ensureServiceWorker();
-        await registerPeriodicPriceCheck();
-        requestServiceWorkerPriceCheck();
-      }
-      await updateNotificationUi();
-      return Notification.permission === "granted";
     }
 
     async function registerPeriodicPriceCheck() {
@@ -1327,201 +1057,6 @@
       }
     }
 
-    async function updateNotificationUi() {
-      state.canConfigureNotifications = canConfigureNotifications();
-      els.alertColumnHeader.hidden = !state.canConfigureNotifications;
-    }
-
-    function openHistory(code, shouldUpdateUrl) {
-      const row = state.rows.find((item) => item.code === code);
-      if (!row) return;
-      const entries = combinedHistory(code);
-      els.historyTitle.textContent = row.name;
-      els.historySubtitle.textContent = row.code + " · " + entries.length + "개 시점";
-      els.historyChart.innerHTML = renderHistoryChart(entries);
-      els.historyRows.innerHTML = entries.map(renderHistoryRow).join("");
-      els.historyEmpty.hidden = entries.length !== 0;
-      if (els.historyModal.hidden) {
-        state.historyTrigger = document.activeElement;
-        state.previousBodyOverflow = document.body.style.overflow;
-      }
-      els.historyModal.hidden = false;
-      document.querySelector("main").inert = true;
-      document.body.style.overflow = "hidden";
-      els.historyCloseButton.focus();
-      state.restoredHistoryCode = code;
-      if (shouldUpdateUrl !== false) updateUrlState();
-    }
-
-    function closeHistory(shouldUpdateUrl) {
-      const wasOpen = !els.historyModal.hidden;
-      els.historyModal.hidden = true;
-      if (wasOpen) {
-        document.querySelector("main").inert = false;
-        document.body.style.overflow = state.previousBodyOverflow;
-        const trigger = state.historyTrigger;
-        (trigger && trigger.isConnected ? trigger : els.searchInput).focus({ preventScroll: true });
-        state.historyTrigger = null;
-      }
-      state.restoredHistoryCode = "";
-      if (shouldUpdateUrl !== false) updateUrlState();
-    }
-
-    function combinedHistory(code) {
-      const byTime = new Map();
-      (state.priceHistory.get(code) || []).forEach((item) => {
-        const key = String(item.timestamp.getTime());
-        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null, hasPrice: false, hasBasePrice: false });
-        const entry = byTime.get(key);
-        entry.price = item.value;
-        entry.hasPrice = true;
-      });
-      (state.basePriceHistory.get(code) || []).forEach((item) => {
-        const key = String(item.timestamp.getTime());
-        if (!byTime.has(key)) byTime.set(key, { timestamp: item.timestamp, price: null, basePrice: null, hasPrice: false, hasBasePrice: false });
-        const entry = byTime.get(key);
-        entry.basePrice = item.value;
-        entry.hasBasePrice = true;
-      });
-
-      let lastPrice = null;
-      let lastBasePrice = null;
-      return [...byTime.values()]
-        .sort((a, b) => compareDates(a.timestamp, b.timestamp))
-        .map((entry) => {
-          if (entry.hasPrice) lastPrice = entry.price;
-          else entry.price = lastPrice;
-          if (entry.hasBasePrice) lastBasePrice = entry.basePrice;
-          else entry.basePrice = lastBasePrice;
-          return entry;
-        })
-        .sort((a, b) => compareDates(b.timestamp, a.timestamp));
-    }
-
-    function renderHistoryRow(entry) {
-      const rate = entry.price !== null && entry.basePrice > 0
-        ? ((entry.basePrice - entry.price) / entry.basePrice) * 100
-        : null;
-      const rateClass = rate === null ? "" : rate > 0 ? " down" : rate < 0 ? " up" : "";
-      return [
-        "<tr>",
-        "<td data-label=\"시각\">" + dateText(entry.timestamp) + "</td>",
-        "<td class=\"num\" data-label=\"기준가\">" + money(entry.basePrice) + "</td>",
-        "<td class=\"num\" data-label=\"현재가\">" + money(entry.price) + "</td>",
-        "<td class=\"num delta" + rateClass + "\" data-label=\"할인율\">" + percent(rate) + "</td>",
-        "</tr>"
-      ].join("");
-    }
-
-    function renderHistoryChart(entries) {
-      const chartEntries = entries.slice().reverse();
-      const points = chartEntries.flatMap((entry) => [entry.price, entry.basePrice]).filter((value) => value !== null);
-      if (points.length === 0) return "";
-
-      const width = 860;
-      const height = 260;
-      const pad = { top: 20, right: 24, bottom: 34, left: 72 };
-      const min = Math.min(...points);
-      const max = Math.max(...points);
-      const span = max - min || 1;
-      const xEnd = width - pad.right;
-      const firstTime = startOfSeoulDay(chartEntries[0].timestamp).getTime();
-      const nowTime = Date.now();
-      const lastTime = Math.max(nowTime, chartEntries[chartEntries.length - 1].timestamp.getTime());
-      const timeSpan = Math.max(1, lastTime - firstTime);
-      const yFor = (value) => pad.top + ((max - value) / span) * (height - pad.top - pad.bottom);
-      const xFor = (date) => pad.left + ((date.getTime() - firstTime) / timeSpan) * (xEnd - pad.left);
-      const pricePoints = chartEntries.map((entry) => entry.price === null ? null : [xFor(entry.timestamp), yFor(entry.price)]);
-      const basePoints = chartEntries.map((entry) => entry.basePrice === null ? null : [xFor(entry.timestamp), yFor(entry.basePrice)]);
-      const xLabels = chartDateLabels(chartEntries, xFor, pad.left, xEnd, new Date(firstTime));
-      xLabels.push({ text: "지금", x: xEnd, anchor: "end" });
-      const midY = yFor((min + max) / 2);
-
-      return [
-        "<svg class=\"history-chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"가격 이력 그래프\">",
-        "<line x1=\"" + pad.left + "\" y1=\"" + pad.top + "\" x2=\"" + pad.left + "\" y2=\"" + (height - pad.bottom) + "\" stroke=\"#cbd5e1\" />",
-        "<line x1=\"" + pad.left + "\" y1=\"" + (height - pad.bottom) + "\" x2=\"" + xEnd + "\" y2=\"" + (height - pad.bottom) + "\" stroke=\"#cbd5e1\" />",
-        axisLabel(money(max), 8, pad.top + 4),
-        axisLabel(money(Math.round((min + max) / 2)), 8, midY + 4),
-        axisLabel(money(min), 8, height - pad.bottom + 4),
-        "<line x1=\"" + pad.left + "\" y1=\"" + midY + "\" x2=\"" + xEnd + "\" y2=\"" + midY + "\" stroke=\"#e2e8f0\" stroke-dasharray=\"4 5\" />",
-        stepPath(basePoints, "#c2410c", xEnd),
-        stepPath(pricePoints, "#0f766e", xEnd),
-        dots(basePoints, "#c2410c"),
-        dots(pricePoints, "#0f766e"),
-        xLabels.map((label) => axisLabel(label.text, label.x, height - 10, label.anchor)).join(""),
-        "</svg>"
-      ].join("");
-    }
-
-    function chartDateLabels(entries, xFor, xStart, xEnd, startDate) {
-      const minGap = 92;
-      const labels = [{ text: shortDate(startDate), x: xStart, anchor: "start" }];
-      entries.forEach((entry) => {
-        const text = shortDate(entry.timestamp);
-        const x = xFor(entry.timestamp);
-        const last = labels[labels.length - 1];
-        if (!last || (text !== last.text && x - last.x >= minGap && xEnd - x >= minGap)) {
-          labels.push({ text, x, anchor: labelAnchor(x, xEnd) });
-        }
-      });
-      const lastText = shortDate(entries[entries.length - 1].timestamp);
-      const last = labels[labels.length - 1];
-      if (last.text !== lastText && xEnd - last.x >= minGap) {
-        const x = xFor(entries[entries.length - 1].timestamp);
-        labels.push({ text: lastText, x, anchor: labelAnchor(x, xEnd) });
-      }
-      return labels;
-    }
-
-    function startOfSeoulDay(date) {
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Seoul",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      }).formatToParts(date);
-      const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-      return new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day), -9, 0, 0, 0));
-    }
-
-    function labelAnchor(x, xEnd) {
-      if (x < 112) return "start";
-      if (xEnd - x < 112) return "end";
-      return "middle";
-    }
-
-    function stepPath(points, color, xEnd) {
-      const values = points.filter(Boolean);
-      if (!values.length) return "";
-      const commands = ["M " + values[0][0].toFixed(1) + " " + values[0][1].toFixed(1)];
-      for (let i = 1; i < values.length; i += 1) {
-        commands.push("H " + values[i][0].toFixed(1));
-        commands.push("V " + values[i][1].toFixed(1));
-      }
-      commands.push("H " + xEnd.toFixed(1));
-      return "<path d=\"" + commands.join(" ") + "\" fill=\"none\" stroke=\"" + color + "\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />";
-    }
-
-    function dots(points, color) {
-      return points.filter(Boolean).map((point) => (
-        "<circle cx=\"" + point[0].toFixed(1) + "\" cy=\"" + point[1].toFixed(1) + "\" r=\"3.5\" fill=\"" + color + "\" />"
-      )).join("");
-    }
-
-    function axisLabel(text, x, y, anchor) {
-      return "<text x=\"" + x + "\" y=\"" + y + "\" text-anchor=\"" + (anchor || "start") + "\" fill=\"#64748b\" font-size=\"12\">" + escapeHtml(text) + "</text>";
-    }
-
-    function shortDate(value) {
-      return new Intl.DateTimeFormat("ko-KR", {
-        timeZone: "Asia/Seoul",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      }).format(value);
-    }
-
     function productUrl(code) {
       return "http://costco.co.kr/p/" + encodeURIComponent(code || "");
     }
@@ -1541,10 +1076,6 @@
       return src;
     }
 
-    function stockChip(row) {
-      return row.inStock ? "" : "<span class=\"chip off\">품절</span>";
-    }
-
     function money(value) {
       return value === null ? "-" : moneyFormatter.format(value);
     }
@@ -1552,25 +1083,6 @@
     function percent(value) {
       if (value === null) return "-";
       return value.toFixed(1) + "%";
-    }
-
-    function dateText(value) {
-      return value ? dateFormatter.format(value) : "-";
-    }
-
-    function relativeTime(value) {
-      if (!value) return "";
-      const seconds = Math.max(0, Math.floor((Date.now() - value.getTime()) / 1000));
-      if (seconds < 60) return "방금";
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return minutes + "분 전";
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return hours + "시간 전";
-      const days = Math.floor(hours / 24);
-      if (days < 30) return days + "일 전";
-      const months = Math.floor(days / 30);
-      if (months < 12) return months + "개월 전";
-      return Math.floor(months / 12) + "년 전";
     }
 
     function escapeHtml(value) {
@@ -1597,7 +1109,6 @@
       state.sortKey = "";
       state.sortDir = "";
       state.visibleCount = LOAD_BATCH_SIZE;
-      closeHistory(false);
       applyFilters();
     }
 
@@ -1605,7 +1116,6 @@
       const params = new URLSearchParams(window.location.search);
       const min = params.get("min");
       const max = params.get("max");
-      const history = params.get("history");
       const stock = params.get("stock");
       const discount = params.get("discount");
       const sortKey = params.get("sort");
@@ -1624,7 +1134,6 @@
         state.sortKey = sortKey;
         state.sortDir = sortDir === toggledSortDir(sortKey) ? sortDir : defaultSortDir(sortKey);
       }
-      state.restoredHistoryCode = history ? cleanCode(history) : "";
     }
 
     function updateUrlState() {
@@ -1643,7 +1152,6 @@
         params.set("sort", state.sortKey);
         params.set("dir", state.sortDir);
       }
-      if (!els.historyModal.hidden && state.restoredHistoryCode) params.set("history", state.restoredHistoryCode);
 
       const queryString = params.toString();
       const nextUrl = window.location.pathname + (queryString ? "?" + queryString : "") + window.location.hash;
@@ -1700,42 +1208,6 @@
     });
     els.resetButton.addEventListener("click", resetFilters);
     els.titleResetButton.addEventListener("click", resetFilters);
-    els.rows.addEventListener("click", async (event) => {
-      const alertButton = event.target.closest("[data-alert-code]");
-      if (alertButton) {
-        alertButton.disabled = true;
-        try {
-          await toggleAlert(alertButton.dataset.alertCode);
-        } finally {
-          if (alertButton.isConnected) alertButton.disabled = false;
-        }
-        return;
-      }
-      const button = event.target.closest("[data-history-code]");
-      if (button) openHistory(button.dataset.historyCode);
-    });
-    els.historyCloseButton.addEventListener("click", closeHistory);
-    els.historyModal.addEventListener("click", (event) => {
-      if (event.target === els.historyModal) closeHistory();
-    });
-    document.addEventListener("keydown", (event) => {
-      if (els.historyModal.hidden) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeHistory();
-      } else if (event.key === "Tab") {
-        const controls = Array.from(els.historyModal.querySelectorAll('button:not(:disabled), a[href], input, select, [tabindex="0"]'));
-        const first = controls[0];
-        const last = controls[controls.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
-        }
-      }
-    });
     window.addEventListener("scroll", maybeLoadMoreRows, { passive: true });
     els.sortButtons.forEach((button) => {
       button.addEventListener("click", () => setSort(button.dataset.sortKey));
@@ -1743,7 +1215,6 @@
     async function init() {
       await ensureServiceWorker();
       await registerPeriodicPriceCheck();
-      await updateNotificationUi();
       loadAll();
       window.setInterval(requestServiceWorkerPriceCheck, PRICE_CHECK_INTERVAL_MS);
     }
