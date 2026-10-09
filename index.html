@@ -102,7 +102,6 @@
     .check-filter input { width: 14px; min-height: 14px; height: 14px; margin: 0; padding: 0; accent-color: var(--accent); }
     #resetButton { border: 0; color: var(--muted); padding: 0 4px; background: none; white-space: nowrap; }
     #resetButton:hover { color: var(--accent); }
-    .results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 10px; font-size: 12px; color: var(--muted); }
     .status { display: flex; align-items: center; gap: 8px; padding: 10px 0 16px; font-size: 12px; color: var(--muted); }
     .status.error { color: var(--bad); }
     .spinner { width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
@@ -204,7 +203,6 @@
       h1 { font-size: 16px; }
       .online-events { margin-bottom: 20px; }
       .online-event-card { flex-basis: 230px; }
-      .results-bar { padding-top: 12px; }
       #rows { grid-template-columns: 1fr; }
       #rows > tr { padding: 16px 0; }
       .event-status { flex-wrap: wrap; }
@@ -254,16 +252,13 @@
             </div>
           </fieldset>
           <div class="check-group" role="group" aria-label="상품 상태 필터">
-            <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
             <label class="check-filter"><input id="discountOnlyInput" type="checkbox" checked> 할인 상품만</label>
+            <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
           </div>
           <button id="resetButton" type="button">초기화</button>
         </div>
       </section>
 
-      <div class="results-bar">
-        <span id="resultCount" role="status" aria-live="polite"></span>
-      </div>
       <div class="status" id="status" role="status" hidden></div>
       <div class="table-wrap">
         <table aria-label="상품의 현재가, 할인율과 마지막 가격 업데이트">
@@ -504,7 +499,6 @@
       sortButtons: document.querySelectorAll("[data-sort-key]")
     };
     Object.assign(els, {
-      resultCount: document.getElementById("resultCount"),
       searchClearButton: document.getElementById("searchClearButton"),
       clearFiltersButton: document.getElementById("clearFiltersButton"),
       productsRefreshButton: document.getElementById("productsRefreshButton"),
@@ -658,7 +652,6 @@
         setStatus("상품 가격을 불러오지 못했습니다. 새로고침을 눌러 다시 시도해 주세요.", true);
         if (!state.loadedAt) {
           els.meta.textContent = "갱신 실패";
-          els.resultCount.textContent = "가격 확인이 필요합니다.";
         }
         console.error(error);
       } finally {
@@ -876,7 +869,7 @@
       const pageRows = state.filtered.slice(0, state.visibleCount);
       els.rows.innerHTML = pageRows.map(renderRow).join("");
       els.empty.hidden = state.filtered.length !== 0;
-      updateResults();
+      updateListControls();
       updateSortButtons();
       updateUrlState();
     }
@@ -945,8 +938,7 @@
       });
     }
 
-    function updateResults() {
-      els.resultCount.textContent = numberFormatter.format(state.filtered.length) + "개";
+    function updateListControls() {
       els.searchClearButton.hidden = !els.searchInput.value;
       els.loadMoreButton.hidden = state.visibleCount >= state.filtered.length;
     }
