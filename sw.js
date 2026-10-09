@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "costco-price-pwa-v4";
+const CACHE_NAME = "costco-price-pwa-v5";
 const DB_NAME = "costco-price-alerts";
 const DB_VERSION = 1;
 const DB_STORE = "kv";

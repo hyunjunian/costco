@@ -34,988 +34,364 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f5f7fa;
+      --bg: #f4f6f5;
       --surface: #ffffff;
-      --surface-2: #eef3f7;
-      --text: #17212b;
-      --muted: #627082;
-      --line: #d8e0e8;
+      --surface-2: #edf3f0;
+      --text: #182c28;
+      --muted: #61716c;
+      --line: #dfe7e3;
       --accent: #0f766e;
       --accent-2: #c2410c;
-      --ok: #137333;
-      --warn: #b45309;
-      --bad: #b91c1c;
-      --shadow: 0 10px 30px rgba(23, 33, 43, 0.08);
+      --ok: #087457;
+      --warn: #a85b17;
+      --bad: #b33434;
+      --shadow: 0 4px 20px rgba(24, 44, 40, .035);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    button, input, select { font: inherit; }
+    button, .button-link { min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 650; transition: background .15s, border-color .15s; }
+    button:hover, .button-link:hover { background: var(--surface-2); border-color: #bccfc5; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    button.primary, .button-link.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.primary:hover, .button-link.primary:hover { background: #095d57; }
+    a { color: var(--accent); }
+    :focus-visible { outline: 3px solid #34958b; outline-offset: 3px; }
+    input, select { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text); font-size: 14px; }
+    input:hover, select:hover { border-color: #a9bdb4; }
+    input:focus, select:focus { border-color: var(--accent); }
+    input::placeholder { color: #82918b; }
+    .shell { width: min(1220px, 100%); margin: 0 auto; padding: 0 28px 40px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 88px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand img { width: 38px; height: 38px; border-radius: 10px; }
+    .brand-wordmark { font-size: 15px; font-weight: 800; letter-spacing: -.04em; }
+    .brand-note { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .section-nav { display: flex; gap: 8px; }
+    .section-nav a { padding: 9px 13px; border-radius: 9px; font-size: 13px; font-weight: 650; text-decoration: none; color: var(--muted); }
+    .section-nav a:hover { background: var(--surface-2); color: var(--accent); }
+    .intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 34px 0 30px; }
+    .eyebrow { margin: 0 0 10px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+    h1 { margin: 0; font-size: clamp(28px, 3.4vw, 40px); font-weight: 800; letter-spacing: -.055em; line-height: 1.25; }
+    .title-button { display: inline; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left; letter-spacing: inherit; }
+    .title-button:hover { background: none; }
+    .intro-description { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+    .meta { font-size: 12px; color: var(--muted); }
+    #meta { margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+    #meta::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .summary { display: grid; grid-template-columns: repeat(3, auto); gap: 24px; padding: 22px 26px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .summary-item + .summary-item { border-left: 1px solid var(--line); padding-left: 24px; }
+    .summary-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 7px; }
+    .summary-value { font-size: 25px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .summary-value.accent { color: var(--accent); }
+    .summary-unit { margin-left: 3px; font-size: 12px; color: var(--muted); font-weight: 500; }
+    .online-events { padding: 20px; margin-bottom: 32px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+    .online-events-header, .online-events-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.035em; }
+    .section-label { display: block; margin-bottom: 4px; color: var(--accent); font-size: 10px; letter-spacing: .1em; font-weight: 750; }
+    .online-events h2 { font-size: 17px; }
+    .online-events-actions { gap: 8px; }
+    .online-events-actions a { font-size: 12px; text-decoration: none; white-space: nowrap; padding: 8px 0; }
+    .online-events-actions button { min-height: 34px; padding: 0 10px; font-size: 12px; border-radius: 8px; }
+    #onlineEventsStatus { margin: 8px 0 14px; }
+    #onlineEventsStatus[data-error] { color: var(--bad); }
+    .online-events-content { display: grid; gap: 14px; min-width: 0; }
+    .online-event-group { min-width: 0; }
+    .online-event-heading { position: absolute; width: 1px; height: 1px; margin: -1px; clip-path: inset(50%); overflow: hidden; }
+    .online-event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+    .online-event-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 11px; text-decoration: none; color: var(--text); transition: border-color .15s, box-shadow .15s; }
+    .online-event-card:hover { border-color: #80b6a8; box-shadow: 0 5px 14px rgba(24, 44, 40, .07); }
+    .online-event-card img { display: block; width: 100%; height: 96px; object-fit: contain; background: #f6f8f7; }
+    .online-event-body { padding: 11px 12px 12px; min-width: 0; overflow-wrap: anywhere; }
+    .online-event-title { margin: 5px 0 7px; font-size: 13px; font-weight: 750; line-height: 1.45; }
+    .online-event-category { color: var(--muted); font-size: 11px; margin: 6px 0 0; }
+    .online-event-date { margin: 6px 0 0; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .online-event-badge { display: inline-flex; padding: 2px 5px; border-radius: 4px; background: #eaf5ef; color: #14664f; font-size: 10px; font-weight: 750; }
+    .event-scroll-hint { display: none; color: var(--muted); font-size: 11px; margin: 9px 0 0; }
+    .products-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 16px; }
+    .section-description { color: var(--muted); font-size: 13px; margin: 5px 0 0; }
+    .text-button { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--accent); font-size: 12px; }
+    .text-button:hover { background: none; text-decoration: underline; }
+    .toolbar { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, .85fr); gap: 16px 26px; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+    .field label, .field-label, .price-range legend { display: block; color: var(--muted); margin: 0 0 7px; font-size: 12px; font-weight: 650; }
+    .search-field { position: relative; }
+    .search-control { position: relative; }
+    .search-icon { position: absolute; left: 14px; top: 14px; width: 18px; height: 18px; pointer-events: none; color: var(--muted); }
+    #searchInput { padding-left: 42px; padding-right: 43px; background: #f8faf9; }
+    #searchInput::-webkit-search-cancel-button { -webkit-appearance: none; }
+    #searchClearButton { position: absolute; right: 5px; top: 5px; padding: 0; width: 36px; min-height: 36px; border: 0; background: none; color: var(--muted); font-size: 22px; font-weight: 400; }
+    .price-range { margin: 0; padding: 0; border: 0; min-width: 0; }
+    .price-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+    .price-input { position: relative; }
+    .price-input input { padding-right: 30px; font-variant-numeric: tabular-nums; }
+    .price-input span { position: absolute; right: 12px; top: 13px; font-size: 12px; color: var(--muted); pointer-events: none; }
+    .range-divider { color: #91a099; }
+    .filter-bottom { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 14px; align-items: center; padding-top: 14px; border-top: 1px solid #edf1ef; }
+    .check-group { display: flex; flex-wrap: wrap; gap: 9px; }
+    .check-filter { display: inline-flex; gap: 7px; align-items: center; padding: 7px 11px; min-height: 38px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 12px; font-weight: 650; cursor: pointer; }
+    .check-filter:has(input:checked) { background: #ecf5f0; border-color: #bbd9cd; color: #125e4c; }
+    .check-filter input { width: 15px; min-height: 15px; height: 15px; margin: 0; padding: 0; accent-color: var(--accent); }
+    #resetButton { min-height: 36px; font-size: 12px; border: 0; background: none; color: var(--muted); padding: 0 6px; }
+    #resetButton:hover { color: var(--accent); }
+    .results-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0 13px; }
+    .result-count { font-size: 14px; font-weight: 750; }
+    .result-count strong { color: var(--accent); }
+    .filter-summary { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .sort-control { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .sort-control label { font-size: 12px; color: var(--muted); }
+    .sort-control select { width: 152px; min-height: 38px; font-size: 12px; border-radius: 8px; }
+    .status { display: flex; align-items: center; gap: 9px; padding: 14px 16px; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; }
+    .status.error { border-color: #edd0ca; background: #fff4f0; color: var(--bad); }
+    .spinner { flex-shrink: 0; width: 16px; height: 16px; border: 2px solid #c9d8d1; border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 17px 20px; border-bottom: 1px solid #e9eeeb; text-align: left; vertical-align: middle; }
+    th { background: #f8faf9; color: var(--muted); font-size: 11px; font-weight: 650; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fbfdfc; }
+    .sort-button { display: inline-flex; align-items: center; justify-content: inherit; gap: 5px; width: 100%; padding: 0; min-height: 24px; border: 0; background: none; color: inherit; font: inherit; }
+    .sort-button:hover { background: none; color: var(--accent); }
+    th.num .sort-button { justify-content: flex-end; }
+    .sort-button::after { content: "↕"; color: #92a29a; }
+    .sort-button[aria-sort="ascending"]::after { content: "↑"; color: var(--accent); }
+    .sort-button[aria-sort="descending"]::after { content: "↓"; color: var(--accent); }
+    .product { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; color: inherit; text-decoration: none; max-width: 480px; }
+    .product:hover .name { color: var(--accent); }
+    .thumb { width: 64px; height: 64px; border: 1px solid #edf0ee; border-radius: 9px; background: #fafbf9; object-fit: contain; padding: 3px; }
+    .thumb.missing { display: grid; place-items: center; color: var(--muted); font-size: 10px; }
+    .name { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; line-height: 1.55; }
+    .product-text { min-width: 0; }
+    .code-row { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+    .code { color: #74847c; font-size: 10px; font-variant-numeric: tabular-nums; }
+    .code-row .chip { padding: 1px 5px; min-height: 17px; font-size: 10px; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .current-price { display: block; font-size: 18px; font-weight: 750; letter-spacing: -.035em; }
+    .base-price { display: block; margin-bottom: 3px; font-size: 11px; color: #738279; text-decoration: line-through; }
+    .subtext { display: block; margin-top: 4px; font-size: 10px; color: var(--muted); font-weight: 400; }
+    .discount-value { display: inline-flex; padding: 3px 8px; border-radius: 6px; font-size: 15px; font-weight: 750; }
+    .delta.down .discount-value { background: #eaf6ef; color: #087457; }
+    .delta.up .discount-value { background: #fff2ed; color: var(--bad); }
+    .savings { color: var(--ok); font-size: 11px; }
+    .chip { display: inline-flex; align-items: center; padding: 2px 7px; min-height: 22px; border-radius: 4px; background: #edf6f0; color: var(--ok); font-size: 11px; font-weight: 650; white-space: nowrap; }
+    .chip.off { background: #fff2ed; color: var(--bad); }
+    .chip.dim { background: #f0f3f1; color: var(--muted); }
+    .delta.up { color: var(--bad); }
+    .delta.down { color: var(--ok); }
+    .history-button, .alert-button { min-height: 34px; padding: 0 10px; font-size: 11px; white-space: nowrap; border-radius: 7px; }
+    .history-count { color: var(--muted); font-size: 10px; font-weight: 500; margin-left: 4px; }
+    .alert-button.active { background: #ecf5ef; border-color: #b7d8ca; color: var(--accent); }
+    .empty { padding: 48px 18px; text-align: center; color: var(--muted); }
+    .empty-title { margin: 0 0 6px; color: var(--text); font-size: 16px; font-weight: 750; }
+    .empty p { font-size: 13px; margin: 0 0 18px; }
+    .list-footer { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 0 0; }
+    #displayCount { color: var(--muted); font-size: 12px; }
+    #loadMoreButton { width: min(280px, 100%); }
+    .data-note { margin: 24px 0 0; font-size: 11px; line-height: 1.8; color: var(--muted); text-align: center; }
+    .site-footer { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--muted); }
+    .site-footer a { text-decoration: none; }
+    .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(14, 34, 28, .48); backdrop-filter: blur(4px); }
+    .dialog { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(920px, 100%); max-height: min(760px, calc(100dvh - 48px)); overflow: hidden; border-radius: 18px; background: var(--surface); box-shadow: 0 24px 70px rgba(14, 34, 28, .2); }
+    .dialog-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 23px; border-bottom: 1px solid var(--line); align-items: start; }
+    .dialog-title { font-size: 18px; line-height: 1.4; margin: 0; }
+    .dialog-subtitle { margin-top: 5px; font-size: 12px; color: var(--muted); }
+    .dialog-body { overflow: auto; }
+    .chart-panel { padding: 22px; border-bottom: 1px solid var(--line); }
+    .chart-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 13px; color: var(--muted); font-size: 12px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-swatch { width: 18px; height: 3px; border-radius: 10px; background: var(--accent); }
+    .legend-swatch.base { background: var(--accent-2); }
+    .history-chart { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbfdfc; }
+    .history-table th, .history-table td { padding: 13px 22px; }
+    @media (max-width: 1040px) {
+      .intro { grid-template-columns: 1fr; gap: 22px; }
+      .summary { width: 100%; grid-template-columns: repeat(3, 1fr); padding: 16px 22px; }
+      .summary-value { font-size: 23px; }
+      .toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+      th, td { padding: 15px 14px; }
+      .product { grid-template-columns: 54px minmax(0, 1fr); gap: 10px; }
+      .thumb { width: 54px; height: 54px; }
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-width: 320px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.5;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    button {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      min-height: 40px;
-      padding: 0 12px;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.48;
-    }
-
-    button.primary {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    input,
-    select {
-      width: 100%;
-      min-height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface);
-      color: var(--text);
-      padding: 0 11px;
-    }
-
-    .shell {
-      width: min(1180px, 100%);
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-      padding: 18px 0 12px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(24px, 4vw, 36px);
-      letter-spacing: 0;
-      line-height: 1.1;
-    }
-
-    .title-button {
-      display: inline;
-      min-height: auto;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      color: inherit;
-      font: inherit;
-      font-weight: inherit;
-      text-align: left;
-    }
-
-    .meta {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .online-events {
-      margin: 12px 0 18px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .online-events-header,
-    .online-events-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .online-events h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .online-events a {
-      color: var(--accent);
-      overflow-wrap: anywhere;
-    }
-
-    .online-events-actions a {
-      font-size: 14px;
-    }
-
-    .online-events-content {
-      display: grid;
-      gap: 14px;
-    }
-
-    .online-event-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-      gap: 12px;
-    }
-
-    .online-event-card {
-      display: block;
-      min-width: 0;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      overflow: hidden;
-      text-decoration: none;
-      overflow-wrap: anywhere;
-    }
-
-    .online-event-card:hover,
-    .online-event-card:focus-visible {
-      border-color: var(--accent);
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .online-event-card img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .online-event-heading {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-
-    .online-event-body {
-      padding: 12px;
-      color: var(--text);
-    }
-
-    .online-event-title {
-      margin: 6px 0;
-      font-size: 15px;
-    }
-
-    .online-event-category,
-    .online-event-date {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .online-event-badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: #ecfdf5;
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .toolbar {
-      display: grid;
-      grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(104px, 0.5fr)) minmax(172px, auto) max-content;
-      gap: 10px;
-      align-items: end;
-      margin: 12px 0 18px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .check-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      min-height: 40px;
-    }
-
-    .field .check-filter {
-      display: inline-flex;
-      gap: 7px;
-      align-items: center;
-      min-height: 34px;
-      margin-bottom: 0;
-      padding: 0 9px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .field .check-filter:has(input:checked) {
-      border-color: var(--accent);
-      background: #ecfdf5;
-      color: var(--accent);
-    }
-
-    .field .check-filter:has(input:disabled) {
-      opacity: 0.52;
-      cursor: not-allowed;
-    }
-
-    .field .check-filter input {
-      width: 16px;
-      min-width: 16px;
-      height: 16px;
-      min-height: 16px;
-      margin: 0;
-      padding: 0;
-      accent-color: var(--accent);
-    }
-
-    #resetButton {
-      width: auto;
-      min-width: 72px;
-      padding: 0 14px;
-      white-space: nowrap;
-      justify-self: start;
-    }
-
-    .status {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      min-height: 44px;
-      margin-bottom: 14px;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface-2);
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .status[hidden] {
-      display: none;
-    }
-
-    .status.error {
-      border-color: #fecaca;
-      background: #fff1f2;
-      color: var(--bad);
-    }
-
-    .alert-button {
-      min-height: 34px;
-      padding: 0 10px;
-      white-space: nowrap;
-    }
-
-    .alert-button.active {
-      border-color: var(--accent);
-      background: #ecfdf5;
-      color: var(--accent);
-      font-weight: 800;
-    }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #cbd5e1;
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      flex: 0 0 auto;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    table {
-      width: 100%;
-      min-width: 940px;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .sort-button {
-      display: inline-flex;
-      justify-content: inherit;
-      align-items: center;
-      gap: 6px;
-      width: 100%;
-      min-height: auto;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      color: inherit;
-      font: inherit;
-      font-weight: inherit;
-      text-align: inherit;
-    }
-
-    th.num .sort-button {
-      justify-content: flex-end;
-      text-align: right;
-    }
-
-    .sort-button::after {
-      content: "↕";
-      color: #94a3b8;
-      font-size: 11px;
-    }
-
-    .sort-button[aria-sort="ascending"]::after {
-      content: "↑";
-      color: var(--accent);
-    }
-
-    .sort-button[aria-sort="descending"]::after {
-      content: "↓";
-      color: var(--accent);
-    }
-
-    tbody tr:hover {
-      background: #f8fafc;
-    }
-
-    .product {
-      display: grid;
-      grid-template-columns: 54px minmax(220px, 1fr);
-      gap: 10px;
-      align-items: center;
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .product:hover .name {
-      color: var(--accent);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .thumb {
-      width: 54px;
-      height: 54px;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      background: #eef2f6;
-      object-fit: cover;
-    }
-
-    .thumb.missing {
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .name {
-      font-weight: 750;
-      overflow-wrap: anywhere;
-    }
-
-    .product-text {
-      min-width: 0;
-    }
-
-    .code-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 2px;
-    }
-
-    .code-row .chip {
-      min-height: 18px;
-      padding: 0 6px;
-      font-size: 11px;
-      line-height: 18px;
-    }
-
-    .code {
-      color: var(--muted);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
-    }
-
-    .num {
-      text-align: right;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .subtext {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 12px;
-      font-variant-numeric: normal;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 26px;
-      padding: 0 9px;
-      border-radius: 999px;
-      background: #e8f5e9;
-      color: var(--ok);
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .chip.off {
-      background: #fee2e2;
-      color: var(--bad);
-    }
-
-    .chip.dim {
-      background: #eef2f7;
-      color: var(--muted);
-    }
-
-    .delta.up {
-      color: var(--bad);
-      font-weight: 800;
-    }
-
-    .delta.down {
-      color: var(--ok);
-      font-weight: 800;
-    }
-
-    .history-button {
-      min-height: 34px;
-      padding: 0 10px;
-      white-space: nowrap;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      padding: 18px;
-      background: rgba(15, 23, 42, 0.45);
-    }
-
-    .modal[hidden] {
-      display: none;
-    }
-
-    .dialog {
-      width: min(920px, 100%);
-      max-height: min(760px, calc(100vh - 36px));
-      overflow: hidden;
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    .dialog-head {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
-      padding: 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .dialog-title {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.25;
-    }
-
-    .dialog-subtitle {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .dialog-body {
-      overflow: auto;
-      padding: 0;
-    }
-
-    .chart-panel {
-      padding: 14px 16px 10px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .chart-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .legend-item {
-      display: inline-flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .legend-swatch {
-      width: 18px;
-      height: 3px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .legend-swatch.base {
-      background: var(--accent-2);
-    }
-
-    .history-chart {
-      width: 100%;
-      height: 260px;
-      display: block;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfdff;
-    }
-
-    .history-table {
-      min-width: 620px;
-      box-shadow: none;
-    }
-
-    .history-table th,
-    .history-table td {
-      padding: 10px 14px;
-    }
-
-    .empty {
-      padding: 52px 16px;
-      text-align: center;
-      color: var(--muted);
-    }
-
     @media (max-width: 900px) {
-      .topbar,
-      .toolbar {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        align-items: stretch;
-      }
+      .table-wrap { background: none; border: 0; border-radius: 0; overflow: visible; box-shadow: none; }
+      .table-wrap > table, .table-wrap > table > tbody, .table-wrap > table > tbody > tr, .table-wrap > table > tbody > tr > td { display: block; }
+      .table-wrap > table > thead { display: none; }
+      #rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      #rows > tr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+      #rows > tr > td { padding: 0; border: 0; }
+      #rows > tr > td:first-child { grid-column: 1 / -1; }
+      #rows td[data-label="현재가"], #rows td[data-label="할인율"] { text-align: left; }
+      #rows td[data-label="할인율"] { text-align: right; }
+      #rows td[data-label="이력"], #rows td[data-label="알림"] { align-self: end; }
+      #rows td[data-label="알림"] { text-align: right; }
+      #rows .history-button, #rows .alert-button { min-height: 38px; }
+      #rows .product { grid-template-columns: 58px minmax(0, 1fr); gap: 11px; }
+      #rows .thumb { width: 58px; height: 58px; }
+      .online-event-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .online-event-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; }
+      .online-event-card img { width: 96px; height: 100%; min-height: 100px; }
+      .history-count { display: none; }
     }
-
-    @media (max-width: 720px) {
-      .shell {
-        padding: 10px;
-      }
-
-      .topbar {
-        gap: 12px;
-        padding-top: 10px;
-      }
-
-      h1 {
-        font-size: 26px;
-        line-height: 1.15;
-      }
-
-      .meta {
-        font-size: 13px;
-      }
-
-      .toolbar {
-        gap: 9px;
-        margin-bottom: 12px;
-        padding: 12px;
-      }
-
-      #resetButton {
-        width: 100%;
-        justify-self: stretch;
-      }
-
-      .check-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .field .check-filter {
-        justify-content: center;
-      }
-
-      .status {
-        align-items: flex-start;
-        margin-bottom: 12px;
-        font-size: 13px;
-      }
-
-      .table-wrap {
-        overflow: visible;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      table,
-      thead,
-      tbody,
-      tr,
-      td {
-        display: block;
-      }
-
-      table {
-        min-width: 0;
-      }
-
-      thead {
-        display: block;
-        margin-bottom: 12px;
-      }
-
-      thead tr {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--surface);
-        box-shadow: var(--shadow);
-      }
-
-      th {
-        display: block;
-        min-height: 38px;
-        padding: 0;
-        border: 0;
-        border-right: 1px solid var(--line);
-        background: var(--surface);
-        font-size: 12px;
-        text-align: center;
-      }
-
-      th:first-child,
-      th:nth-last-child(-n + 2) {
-        display: none;
-      }
-
-      th:nth-child(3) {
-        border-right: 0;
-      }
-
-      .sort-button {
-        justify-content: center;
-        min-height: 38px;
-        padding: 0 8px;
-        text-align: center;
-      }
-
-      .sort-button[aria-sort="ascending"],
-      .sort-button[aria-sort="descending"] {
-        background: #ecfdf5;
-        color: var(--accent);
-      }
-
-      tbody {
-        display: grid;
-        gap: 10px;
-      }
-
-      tbody tr {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 12px;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--surface);
-        box-shadow: var(--shadow);
-      }
-
-      tbody tr:hover {
-        background: var(--surface);
-      }
-
-      td {
-        min-width: 0;
-        padding: 0;
-        border-bottom: 0;
-      }
-
-      td:first-child {
-        grid-column: 1 / -1;
-      }
-
-      td:nth-last-child(2) {
-        grid-column: 1;
-      }
-
-      td:last-child {
-        grid-column: 2;
-      }
-
-      td:not(:first-child)::before {
-        content: attr(data-label);
-        display: block;
-        margin-bottom: 2px;
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      td:nth-last-child(-n + 2)::before {
-        content: none;
-      }
-
-      .product {
-        grid-template-columns: 64px minmax(0, 1fr);
-        gap: 11px;
-      }
-
-      .thumb {
-        width: 64px;
-        height: 64px;
-      }
-
-      .name {
-        font-size: 15px;
-        line-height: 1.35;
-      }
-
-      .num {
-        text-align: left;
-      }
-
-      .history-button {
-        width: 100%;
-        min-height: 38px;
-      }
-
-      .alert-button {
-        width: 100%;
-        min-height: 38px;
-      }
-
-      .modal {
-        align-items: end;
-        padding: 0;
-      }
-
-      .dialog {
-        width: 100%;
-        max-height: 92dvh;
-        border-radius: 14px 14px 0 0;
-        grid-template-rows: auto minmax(0, 1fr);
-      }
-
-      .dialog-head {
-        gap: 12px;
-        align-items: center;
-        padding: 14px 14px 12px;
-      }
-
-      .dialog-title {
-        font-size: 16px;
-        line-height: 1.3;
-      }
-
-      .dialog-subtitle {
-        font-size: 12px;
-      }
-
-      #historyCloseButton {
-        min-width: 54px;
-        min-height: 36px;
-        padding: 0 10px;
-      }
-
-      .dialog-body {
-        min-height: 0;
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-
-      .chart-panel {
-        padding: 12px 12px 10px;
-      }
-
-      .history-chart {
-        height: 190px;
-      }
-
-      .history-table {
-        min-width: 0;
-      }
-
-      .history-table thead {
-        display: none;
-      }
-
-      .history-table tbody tr {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 12px;
-        margin: 0 12px 10px;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--surface);
-        box-shadow: none;
-      }
-
-      .history-table tbody tr:first-child {
-        margin-top: 12px;
-      }
-
-      .history-table td:first-child {
-        grid-column: 1 / -1;
-        font-weight: 800;
-      }
-
-      .history-table td:nth-last-child(3),
-      .history-table td:nth-last-child(2),
-      .history-table td:last-child {
-        grid-column: auto;
-      }
-
-      .history-table td:nth-last-child(-n + 3)::before {
-        content: attr(data-label);
-      }
+    @media (max-width: 640px) {
+      html { scroll-padding-top: 16px; }
+      .shell { padding: 0 16px 28px; }
+      .topbar { min-height: 72px; gap: 8px; }
+      .brand-wordmark { font-size: 13px; }
+      .brand img { width: 32px; height: 32px; }
+      .brand-note { font-size: 10px; }
+      .section-nav { gap: 2px; }
+      .section-nav a { font-size: 11px; padding: 8px; }
+      .intro { padding: 26px 0 22px; gap: 20px; }
+      h1 { font-size: 29px; }
+      .intro-description { font-size: 13px; line-height: 1.7; max-width: 290px; }
+      .summary { padding: 14px; gap: 12px; border-radius: 12px; }
+      .summary-item + .summary-item { padding-left: 12px; }
+      .summary-label { font-size: 10px; margin-bottom: 4px; }
+      .summary-value { font-size: 21px; }
+      .summary-unit { font-size: 10px; }
+      .online-events { padding: 15px; margin-bottom: 26px; border-radius: 13px; }
+      .online-events-header { align-items: center; gap: 8px; }
+      .online-events h2 { font-size: 15px; }
+      .online-events-actions { gap: 8px; }
+      .online-events-actions a { display: none; }
+      .online-events-actions button { min-height: 36px; padding: 0 9px; font-size: 11px; }
+      #onlineEventsStatus { margin: 8px 0 12px; font-size: 11px; }
+      .online-event-grid { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 8px; scrollbar-width: thin; }
+      .online-event-card { display: grid; grid-template-columns: 88px minmax(0, 1fr); flex: 0 0 calc(100% - 26px); scroll-snap-align: start; }
+      .online-event-card img { width: 88px; min-height: 128px; }
+      .online-event-title { font-size: 12px; }
+      .online-event-body { padding: 10px; }
+      .event-scroll-hint { display: block; }
+      .products-heading { margin-bottom: 14px; }
+      h2 { font-size: 19px; }
+      .section-description { font-size: 12px; }
+      .toolbar { grid-template-columns: 1fr; padding: 16px; gap: 15px; border-radius: 13px; }
+      .price-range legend { font-size: 11px; }
+      .filter-bottom { padding-top: 12px; gap: 8px; }
+      .check-group { gap: 6px; }
+      .check-filter { font-size: 11px; padding: 7px 8px; min-height: 38px; }
+      #resetButton { font-size: 11px; flex-shrink: 0; }
+      .results-bar { padding-top: 19px; gap: 8px; }
+      .sort-control label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+      .sort-control select { width: 136px; }
+      .result-count { font-size: 13px; }
+      .filter-summary { font-size: 10px; }
+      #rows { grid-template-columns: 1fr; gap: 10px; }
+      #rows > tr { padding: 16px; }
+      #rows .product { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
+      #rows .thumb { width: 64px; height: 64px; }
+      .current-price { font-size: 21px; }
+      .discount-value { font-size: 17px; }
+      .name { font-size: 14px; }
+      .status { flex-wrap: wrap; font-size: 12px; }
+      .modal { padding: 0; align-items: end; }
+      .dialog { width: 100%; max-height: 90dvh; border-radius: 18px 18px 0 0; }
+      .dialog-head { padding: 19px 17px; gap: 12px; }
+      .dialog-title { font-size: 16px; }
+      .dialog-body { padding-bottom: env(safe-area-inset-bottom); }
+      .chart-panel { padding: 17px; }
+      .history-table th, .history-table td { padding: 10px 7px; font-size: 11px; white-space: normal; }
+      .history-table th:first-child, .history-table td:first-child { padding-left: 17px; }
+      .site-footer { font-size: 10px; flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
-      <div>
-        <h1><button class="title-button" id="titleResetButton" type="button">코스트코 온라인몰 할인 추적기</button></h1>
-        <div class="meta" id="meta">데이터를 불러오는 중입니다.</div>
+      <div class="brand">
+        <img src="icon.svg" alt="" width="38" height="38">
+        <div class="brand-wordmark">코스트코 할인 추적기<span class="brand-note">온라인몰 가격을 한눈에</span></div>
       </div>
+      <nav class="section-nav" aria-label="화면 이동">
+        <a href="#productsSection">상품 찾기</a>
+        <a href="#eventsSection">이벤트</a>
+      </nav>
     </header>
 
-    <section class="online-events" aria-labelledby="onlineEventsTitle">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">가격 비교 · 할인 혜택</p>
+        <h1 id="pageTitle"><button class="title-button" id="titleResetButton" type="button" title="기본 검색 조건으로 돌아가기">코스트코 온라인몰,<br>가격을 한눈에.</button></h1>
+        <p class="intro-description">현재 가격부터 할인율, 가격 변동까지.<br>구매 전, 코스트코 온라인몰 가격을 비교해 보세요.</p>
+        <div class="meta" id="meta" role="status">상품 정보를 불러오는 중입니다.</div>
+      </div>
+      <div class="summary" aria-label="전체 상품 현황">
+        <div class="summary-item"><span class="summary-label">추적 중인 상품</span><span class="summary-value" id="summaryProducts">—</span><span class="summary-unit">개</span></div>
+        <div class="summary-item"><span class="summary-label">판매 중 할인 상품</span><span class="summary-value accent" id="summaryDeals">—</span><span class="summary-unit">개</span></div>
+        <div class="summary-item"><span class="summary-label">판매 상품 최대 할인</span><span class="summary-value accent" id="summarySavings">—</span><span class="summary-unit">%</span></div>
+      </div>
+    </section>
+
+    <section class="online-events" id="eventsSection" aria-labelledby="onlineEventsTitle">
       <div class="online-events-header">
-        <h2 id="onlineEventsTitle">현재 온라인 이벤트</h2>
+        <div><span class="section-label">ONLINE EVENTS</span><h2 id="onlineEventsTitle">지금 진행 중인 이벤트</h2></div>
         <div class="online-events-actions">
-          <a href="https://www.costco.co.kr/OnlineEvent" target="_blank" rel="noopener noreferrer">공식 이벤트 보기</a>
-          <button id="onlineEventsRefresh" type="button">새로고침</button>
+          <a href="https://www.costco.co.kr/OnlineEvent" target="_blank" rel="noopener noreferrer">공식 페이지 ↗</a>
+          <button id="onlineEventsRefresh" type="button" aria-label="현재 이벤트 새로고침">새로고침</button>
+          <button id="onlineEventsToggle" type="button" aria-expanded="true" aria-controls="onlineEventsBody">접기</button>
         </div>
       </div>
       <p id="onlineEventsStatus" class="meta" role="status" aria-live="polite">이벤트를 불러오는 중입니다.</p>
-      <div id="onlineEventsContent" class="online-events-content" aria-busy="true"></div>
+      <div id="onlineEventsBody">
+        <div id="onlineEventsContent" class="online-events-content" aria-busy="true"></div>
+        <p class="event-scroll-hint">옆으로 넘겨 다른 이벤트도 확인하세요 →</p>
+      </div>
     </section>
 
-    <section class="toolbar" aria-label="상품 필터">
-      <div class="field">
-        <label for="searchInput">검색</label>
-        <input id="searchInput" type="search" placeholder="상품명 또는 코드">
+    <section id="productsSection" aria-labelledby="productsTitle">
+      <div class="products-heading">
+        <div><span class="section-label">PRICE EXPLORER</span><h2 id="productsTitle">어떤 상품을 찾으세요?</h2><p class="section-description">원하는 상품의 가격과 할인 혜택을 비교하세요.</p></div>
+        <button class="text-button" id="productsRefreshButton" type="button">가격 새로고침 ↻</button>
       </div>
-      <div class="field">
-        <label for="minPriceInput">현재가 최소</label>
-        <input id="minPriceInput" type="number" min="0" step="100" inputmode="numeric" value="0" required>
-      </div>
-      <div class="field">
-        <label for="maxPriceInput">현재가 최대</label>
-        <input id="maxPriceInput" type="number" min="0" step="100" inputmode="numeric" required>
-      </div>
-      <div class="field">
-        <label>상품 상태</label>
-        <div class="check-group">
-          <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
-          <label class="check-filter"><input id="discountOnlyInput" type="checkbox" checked> 할인 상품만</label>
+      <section class="toolbar" aria-label="상품 검색과 필터">
+        <div class="field search-field">
+          <label for="searchInput">상품 검색</label>
+          <div class="search-control">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            <input id="searchInput" type="search" placeholder="상품명 또는 상품 코드로 검색" autocomplete="off">
+            <button id="searchClearButton" type="button" aria-label="검색어 지우기" hidden>×</button>
+          </div>
         </div>
+        <fieldset class="price-range">
+          <legend>가격 범위</legend>
+          <div class="price-inputs">
+            <div class="price-input"><input id="minPriceInput" aria-label="최소 가격" type="number" min="0" step="100" inputmode="numeric" value="0"><span>원</span></div>
+            <span class="range-divider" aria-hidden="true">–</span>
+            <div class="price-input"><input id="maxPriceInput" aria-label="최대 가격" type="number" min="0" step="100" inputmode="numeric"><span>원</span></div>
+          </div>
+        </fieldset>
+        <div class="filter-bottom">
+          <div class="check-group" role="group" aria-label="상품 상태 필터">
+            <label class="check-filter"><input id="inStockOnlyInput" type="checkbox" checked> 판매 상품만</label>
+            <label class="check-filter"><input id="discountOnlyInput" type="checkbox" checked> 할인 상품만</label>
+          </div>
+          <button id="resetButton" type="button">초기화 ↺</button>
+        </div>
+      </section>
+
+      <div class="results-bar">
+        <div><div class="result-count" id="resultCount" role="status" aria-live="polite">상품을 찾고 있습니다.</div><div id="filterSummary" class="filter-summary">판매 중인 할인 상품을 보여드립니다.</div></div>
+        <div class="sort-control"><label for="sortSelect">정렬</label><select id="sortSelect"><option value="latest">최근 확인한 순</option><option value="price-asc">가격 낮은 순</option><option value="price-desc">가격 높은 순</option><option value="discountRate-desc">할인율 높은 순</option><option value="discountRate-asc">할인율 낮은 순</option></select></div>
       </div>
-      <button id="resetButton" type="button">초기화</button>
+      <div class="status" id="status" role="status" hidden></div>
+      <section class="table-wrap" aria-label="상품 가격 목록">
+        <table>
+          <thead><tr><th scope="col">상품</th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인 혜택</button></th><th scope="col">가격 이력</th><th scope="col" id="alertColumnHeader" hidden>가격 알림</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden><div class="empty-title">조건에 맞는 상품이 없어요.</div><p>검색어를 바꾸거나 가격 범위를 넓혀 보세요.</p><button class="primary" id="clearFiltersButton" type="button">모든 상품 보기</button></div>
+      </section>
+      <div class="list-footer"><span id="displayCount"></span><button id="loadMoreButton" type="button" hidden>상품 더 보기</button></div>
+      <p class="data-note">할인율과 절약 금액은 수집한 기준가와 현재가를 비교한 값입니다.<br>상품명을 누르면 코스트코 온라인몰로 이동합니다. 최종 가격과 재고는 판매 페이지에서 확인해 주세요.</p>
     </section>
-
-    <div class="status" id="status" hidden></div>
-
-    <section class="table-wrap" aria-label="상품 가격 목록">
-      <table>
-        <thead>
-          <tr>
-            <th>상품</th>
-            <th class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th>
-            <th class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th>
-            <th>이력</th>
-            <th id="alertColumnHeader" hidden>알림</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div class="empty" id="empty" hidden>조건에 맞는 상품이 없습니다.</div>
-    </section>
-
+    <footer class="site-footer"><span>코스트코 온라인몰 할인 추적기 · 비공식 가격 비교 서비스</span><a href="https://www.costco.co.kr" target="_blank" rel="noopener noreferrer">코스트코 온라인몰 ↗</a></footer>
   </main>
 
   <div class="modal" id="historyModal" hidden>
@@ -1027,7 +403,7 @@
         </div>
         <button id="historyCloseButton" type="button">닫기</button>
       </header>
-      <div class="dialog-body">
+      <div class="dialog-body" tabindex="0" aria-label="가격 이력 상세, 아래로 스크롤해 이전 가격을 확인하세요">
         <div class="chart-panel">
           <div class="chart-legend">
             <span class="legend-item"><span class="legend-swatch base"></span>기준가</span>
@@ -1060,6 +436,13 @@
       const content = document.getElementById("onlineEventsContent");
       const status = document.getElementById("onlineEventsStatus");
       const refresh = document.getElementById("onlineEventsRefresh");
+      const toggle = document.getElementById("onlineEventsToggle");
+      const body = document.getElementById("onlineEventsBody");
+      toggle.addEventListener("click", () => {
+        body.hidden = !body.hidden;
+        toggle.setAttribute("aria-expanded", String(!body.hidden));
+        toggle.textContent = body.hidden ? "펼치기" : "접기";
+      });
 
       function safeUrl(value, image = false) {
         if (typeof value !== "string" || !value.trim()) return null;
@@ -1135,6 +518,8 @@
                 group.className = "online-event-group";
                 const grid = document.createElement("div");
                 grid.className = "online-event-grid";
+            grid.tabIndex = 0;
+            grid.setAttribute("aria-label", "현재 이벤트 목록, 옆으로 스크롤할 수 있습니다");
                 for (const anchor of source.querySelectorAll("a[href]")) {
                   const card = createCard(anchor, seen);
                   if (card) grid.append(card);
@@ -1157,6 +542,7 @@
         content.setAttribute("aria-busy", "true");
         content.replaceChildren();
         status.textContent = "이벤트를 불러오는 중입니다.";
+      status.removeAttribute("data-error");
         const controller = new AbortController();
         const timeout = window.setTimeout(() => controller.abort(), 15000);
         try {
@@ -1173,9 +559,16 @@
             : "표시할 이벤트가 없습니다. 공식 이벤트 페이지에서도 확인할 수 있습니다.";
         } catch (error) {
           content.replaceChildren();
+        status.setAttribute("data-error", "true");
           status.textContent = error.name === "AbortError"
-            ? "이벤트 요청 시간이 초과되었습니다. 새로고침하거나 공식 이벤트 페이지를 확인해 주세요."
-            : "이벤트를 불러오지 못했습니다. 네트워크 또는 코스트코의 외부 접근 제한이 원인일 수 있습니다. 새로고침하거나 공식 이벤트 페이지를 확인해 주세요.";
+          ? "이벤트 확인이 지연되고 있어요. 잠시 후 다시 시도해 주세요. "
+          : "이벤트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요. ";
+        const link = document.createElement("a");
+        link.href = COSTCO_ORIGIN + "/OnlineEvent";
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "공식 이벤트 확인 ↗";
+        status.append(link);
         } finally {
           window.clearTimeout(timeout);
           content.setAttribute("aria-busy", "false");
@@ -1230,6 +623,9 @@
       loadedAt: null,
       canConfigureNotifications: false,
       notificationPermissionPromptDismissed: false,
+      loading: false,
+      historyTrigger: null,
+      previousBodyOverflow: "",
       renderId: 0
     };
 
@@ -1260,6 +656,19 @@
       historyCloseButton: document.getElementById("historyCloseButton"),
       sortButtons: document.querySelectorAll("[data-sort-key]")
     };
+    Object.assign(els, {
+      resultCount: document.getElementById("resultCount"),
+      filterSummary: document.getElementById("filterSummary"),
+      sortSelect: document.getElementById("sortSelect"),
+      searchClearButton: document.getElementById("searchClearButton"),
+      clearFiltersButton: document.getElementById("clearFiltersButton"),
+      productsRefreshButton: document.getElementById("productsRefreshButton"),
+      summaryProducts: document.getElementById("summaryProducts"),
+      summaryDeals: document.getElementById("summaryDeals"),
+      summarySavings: document.getElementById("summarySavings"),
+      displayCount: document.getElementById("displayCount"),
+      loadMoreButton: document.getElementById("loadMoreButton")
+    });
 
     const moneyFormatter = new Intl.NumberFormat("ko-KR", {
       style: "currency",
@@ -1366,7 +775,10 @@
     }
 
     async function loadAll() {
-      setStatus("products, prices, basePrices를 가져오고 있습니다.", false);
+      if (state.loading) return;
+      state.loading = true;
+      els.productsRefreshButton.disabled = true;
+      setStatus("상품 가격을 확인하고 있습니다.", false);
 
       try {
         const [products, prices, basePrices] = await Promise.all([
@@ -1376,9 +788,15 @@
         ]);
         await applyLoadedData(products, prices, basePrices);
       } catch (error) {
-        setStatus("데이터를 불러오지 못했습니다. " + error.message, true);
-        els.meta.textContent = "로드 실패";
+        setStatus("상품 가격을 불러오지 못했습니다. 가격 새로고침을 눌러 다시 시도해 주세요.", true);
+        if (!state.loadedAt) {
+          els.meta.textContent = "상품 정보를 확인할 수 없습니다.";
+          els.resultCount.textContent = "가격 확인이 필요합니다.";
+        }
         console.error(error);
+      } finally {
+        state.loading = false;
+        els.productsRefreshButton.disabled = false;
       }
     }
 
@@ -1415,6 +833,7 @@
       });
 
       state.loadedAt = new Date();
+      updateSummary();
       state.defaultMaxPrice = Math.max(0, ...state.rows.map((row) => row.price || 0));
       await notifyPriceChanges(await detectPriceChanges(state.rows));
       await savePriceSnapshot(state.rows);
@@ -1425,7 +844,7 @@
       state.isRestoring = false;
       updateUrlState();
       setReadyStatus();
-      els.meta.textContent = "마지막 업데이트 " + dateFormatter.format(state.loadedAt);
+      els.meta.textContent = "가격 데이터 확인 · " + dateFormatter.format(state.loadedAt);
       await updateNotificationUi();
     }
 
@@ -1500,14 +919,8 @@
       return !["0", "false", "no", "n", "품절", "없음", "out", "outofstock", "soldout"].includes(text.replace(/\s+/g, ""));
     }
 
-    async function applyFilters(options = {}) {
-      resetProductStatusFilterAvailability();
-      if (options.resetProductStatus === true) {
-        els.inStockOnlyInput.checked = true;
-        els.discountOnlyInput.checked = true;
-      }
+    async function applyFilters() {
       state.filtered = baseFilteredRows();
-      state.filtered = disableEmptyProductStatusFilters(state.filtered) || state.filtered;
 
       const sorter = getSorter();
       if (sorter) state.filtered.sort(sorter);
@@ -1518,33 +931,6 @@
     function resetProductStatusFilterAvailability() {
       els.inStockOnlyInput.disabled = false;
       els.discountOnlyInput.disabled = false;
-    }
-
-    function disableProductStatusFilter(input) {
-      input.checked = false;
-      input.disabled = true;
-    }
-
-    function disableEmptyProductStatusFilters(filteredRows) {
-      if (filteredRows.length > 0 || (!els.inStockOnlyInput.checked && !els.discountOnlyInput.checked)) return null;
-
-      if (els.discountOnlyInput.checked) {
-        disableProductStatusFilter(els.discountOnlyInput);
-        const withoutDiscount = baseFilteredRows();
-        if (withoutDiscount.length > 0) {
-          return withoutDiscount;
-        }
-      }
-
-      if (els.inStockOnlyInput.checked) {
-        disableProductStatusFilter(els.inStockOnlyInput);
-        const withoutStock = baseFilteredRows();
-        if (withoutStock.length > 0) {
-          return withoutStock;
-        }
-      }
-
-      return baseFilteredRows();
     }
 
     function baseFilteredRows() {
@@ -1617,7 +1003,7 @@
       if (renderId !== state.renderId) return;
       els.rows.innerHTML = pageRows.map((row) => renderRow(row, alertCodes)).join("");
       els.empty.hidden = state.filtered.length !== 0;
-
+      updateResults();
       updateSortButtons();
       updateUrlState();
     }
@@ -1637,7 +1023,7 @@
       window.clearTimeout(searchFilterTimer);
       searchFilterTimer = window.setTimeout(() => {
         state.visibleCount = LOAD_BATCH_SIZE;
-        applyFilters({ resetProductStatus: true });
+        applyFilters();
       }, SEARCH_DEBOUNCE_MS);
     }
 
@@ -1666,10 +1052,33 @@
     }
 
     function updateSortButtons() {
+      els.sortSelect.value = state.sortKey ? state.sortKey + "-" + state.sortDir : "latest";
       els.sortButtons.forEach((button) => {
         const active = button.dataset.sortKey === state.sortKey;
         button.setAttribute("aria-sort", active ? (state.sortDir === "asc" ? "ascending" : "descending") : "none");
+        button.closest("th").setAttribute("aria-sort", active ? (state.sortDir === "asc" ? "ascending" : "descending") : "none");
       });
+    }
+
+    function updateSummary() {
+      const deals = state.rows.filter((row) => row.inStock && row.discountRate > 0);
+      els.summaryProducts.textContent = numberFormatter.format(state.rows.length);
+      els.summaryDeals.textContent = numberFormatter.format(deals.length);
+      const largestDiscount = deals.reduce((largest, row) => Math.max(largest, row.discountRate), 0);
+      els.summarySavings.textContent = numberFormatter.format(Math.round(largestDiscount * 10) / 10);
+    }
+
+    function updateResults() {
+      els.resultCount.innerHTML = "상품 <strong>" + numberFormatter.format(state.filtered.length) + "</strong>개";
+      const conditions = [];
+      if (els.searchInput.value.trim()) conditions.push('“' + els.searchInput.value.trim() + '”');
+      if (els.inStockOnlyInput.checked) conditions.push("판매 중");
+      if (els.discountOnlyInput.checked) conditions.push("할인 상품");
+      if (parsePriceInput(els.minPriceInput.value, 0) > 0 || parsePriceInput(els.maxPriceInput.value, state.defaultMaxPrice) < state.defaultMaxPrice) conditions.push("가격 범위 적용");
+      els.filterSummary.textContent = conditions.join(" · ") || "전체 상품";
+      els.searchClearButton.hidden = !els.searchInput.value;
+      els.displayCount.textContent = state.filtered.length ? numberFormatter.format(Math.min(state.visibleCount, state.filtered.length)) + " / " + numberFormatter.format(state.filtered.length) + "개 표시" : "";
+      els.loadMoreButton.hidden = state.visibleCount >= state.filtered.length;
     }
 
     function renderRow(row, alertCodes) {
@@ -1686,9 +1095,9 @@
         renderImage(row),
         "<div class=\"product-text\"><div class=\"name\">" + escapeHtml(row.name) + "</div><div class=\"code-row\"><span class=\"code\">" + escapeHtml(row.code || "-") + "</span>" + stockChip(row) + "</div></div>",
         "</a></td>",
-        "<td class=\"num\" data-label=\"현재가\">" + money(row.price) + "<span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + "</span></td>",
-        "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\">" + percent(row.discountRate) + "<span class=\"subtext\">&nbsp;</span></td>",
-        "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\">이력 " + numberFormatter.format(historyCount) + "</button></td>",
+        "<td class=\"num\" data-label=\"현재가\">" + (row.delta < 0 && row.basePrice !== null ? "<span class=\"base-price\" aria-label=\"기준가\">" + money(row.basePrice) + "</span>" : "") + "<strong class=\"current-price\">" + money(row.price) + "</strong><span class=\"subtext\">" + escapeHtml(relativeTime(row.priceTimestamp)) + " 확인</span></td>",
+        "<td class=\"num delta" + discountClass + "\" data-label=\"할인율\"><span class=\"discount-value\">" + percent(row.discountRate) + "</span>" + (row.delta < 0 ? "<span class=\"subtext savings\">" + money(-row.delta) + " 절약</span>" : "<span class=\"subtext\">기준가 대비</span>") + "</td>",
+        "<td data-label=\"이력\"><button class=\"history-button\" type=\"button\" data-history-code=\"" + escapeAttribute(row.code) + "\" aria-label=\"" + escapeAttribute(row.name + " 가격 이력 보기") + "\">가격 이력<span class=\"history-count\">" + numberFormatter.format(historyCount) + "</span></button></td>",
         alertCell,
         "</tr>"
       ].join("");
@@ -1932,13 +1341,28 @@
       els.historyChart.innerHTML = renderHistoryChart(entries);
       els.historyRows.innerHTML = entries.map(renderHistoryRow).join("");
       els.historyEmpty.hidden = entries.length !== 0;
+      if (els.historyModal.hidden) {
+        state.historyTrigger = document.activeElement;
+        state.previousBodyOverflow = document.body.style.overflow;
+      }
       els.historyModal.hidden = false;
+      document.querySelector("main").inert = true;
+      document.body.style.overflow = "hidden";
+      els.historyCloseButton.focus();
       state.restoredHistoryCode = code;
       if (shouldUpdateUrl !== false) updateUrlState();
     }
 
     function closeHistory(shouldUpdateUrl) {
+      const wasOpen = !els.historyModal.hidden;
       els.historyModal.hidden = true;
+      if (wasOpen) {
+        document.querySelector("main").inert = false;
+        document.body.style.overflow = state.previousBodyOverflow;
+        const trigger = state.historyTrigger;
+        (trigger && trigger.isConnected ? trigger : els.searchInput).focus({ preventScroll: true });
+        state.historyTrigger = null;
+      }
       state.restoredHistoryCode = "";
       if (shouldUpdateUrl !== false) updateUrlState();
     }
@@ -2164,6 +1588,7 @@
     }
 
     function resetFilters() {
+      window.clearTimeout(searchFilterTimer);
       els.searchInput.value = "";
       resetProductStatusFilterAvailability();
       els.inStockOnlyInput.checked = true;
@@ -2226,8 +1651,35 @@
     }
 
     els.searchInput.addEventListener("input", () => {
+      els.searchClearButton.hidden = !els.searchInput.value;
       scheduleSearchFilter();
     });
+    els.searchClearButton.addEventListener("click", () => {
+      window.clearTimeout(searchFilterTimer);
+      els.searchInput.value = "";
+      state.visibleCount = LOAD_BATCH_SIZE;
+      applyFilters();
+      els.searchInput.focus();
+    });
+    els.sortSelect.addEventListener("change", () => {
+      const [key, direction] = els.sortSelect.value.split("-");
+      state.sortKey = key === "latest" ? "" : key;
+      state.sortDir = key === "latest" ? "" : direction;
+      state.visibleCount = LOAD_BATCH_SIZE;
+      applyFilters();
+    });
+    els.clearFiltersButton.addEventListener("click", () => {
+      window.clearTimeout(searchFilterTimer);
+      els.searchInput.value = "";
+      els.inStockOnlyInput.checked = false;
+      els.discountOnlyInput.checked = false;
+      setDefaultPriceRange();
+      state.visibleCount = LOAD_BATCH_SIZE;
+      applyFilters();
+      els.searchInput.focus();
+    });
+    els.loadMoreButton.addEventListener("click", loadMoreRows);
+    els.productsRefreshButton.addEventListener("click", loadAll);
     els.minPriceInput.addEventListener("input", () => {
       clampPriceInputs();
       state.visibleCount = LOAD_BATCH_SIZE;
@@ -2267,7 +1719,22 @@
       if (event.target === els.historyModal) closeHistory();
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !els.historyModal.hidden) closeHistory();
+      if (els.historyModal.hidden) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeHistory();
+      } else if (event.key === "Tab") {
+        const controls = Array.from(els.historyModal.querySelectorAll('button:not(:disabled), a[href], input, select, [tabindex="0"]'));
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     });
     window.addEventListener("scroll", maybeLoadMoreRows, { passive: true });
     els.sortButtons.forEach((button) => {
