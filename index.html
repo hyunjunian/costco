@@ -41,17 +41,17 @@
     })();
   </script>
   <style>
-    :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-2: #f4f6f5; --text: #202b27; --muted: #748079; --line: #e8ece9; --accent: #0f766e; --ok: #0f766e; --bad: #b33434; --hover: #fafbf9; --active-line: #b4ccc0; --active-bg: #f4f8f5; --backdrop: rgba(20, 35, 29, .35); --popup-shadow: 0 8px 24px rgba(20, 35, 29, .1); }
+    :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-2: #f4f6f5; --text: #202b27; --muted: #748079; --line: #e8ece9; --accent: #0f766e; --ok: #0f766e; --bad: #b33434; --hover: #fafbf9; --active-line: #b4ccc0; --active-bg: #f4f8f5; --backdrop: rgba(20, 35, 29, .35); --popup-shadow: 0 8px 24px rgba(20, 35, 29, .1); --control-height: 42px; --value-line-height: 28px; --value-columns: minmax(60px, .6fr) minmax(130px, 1.2fr) minmax(70px, .8fr); }
     html[data-theme="dark"] { color-scheme: dark; --bg: #111815; --surface: #18221d; --surface-2: #212d26; --text: #e8eee9; --muted: #a0afa4; --line: #2b3b31; --accent: #5dd9bc; --ok: #5dd9bc; --bad: #fb9494; --hover: #1b2821; --active-line: #4b8068; --active-bg: #253b32; --backdrop: rgba(0, 0, 0, .65); --popup-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
-    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
     button, input, select { font: inherit; }
-    button { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 12px; cursor: pointer; }
+    button { min-height: var(--control-height); padding: 0 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 13px; line-height: 1.5; cursor: pointer; }
     button:hover { background: var(--surface-2); }
     button:disabled { cursor: not-allowed; opacity: .45; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    input, select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 13px; }
+    input, select { width: 100%; min-width: 0; min-height: var(--control-height); padding: 0 11px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 14px; line-height: 1.5; }
     input:focus, select:focus { border-color: var(--accent); }
     input::placeholder { color: var(--muted); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -60,14 +60,14 @@
     h1 { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -.035em; }
     .title-button { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; }
     .title-button:hover { background: none; }
-    .refresh-button { min-height: 40px; width: 40px; border: 0; font-size: 23px; color: var(--muted); }
+    .refresh-button { display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-height); width: 42px; padding: 0; border: 0; font-size: 23px; line-height: 1; color: var(--muted); }
     .refresh-group { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .theme-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; width: 36px; padding: 0; border: 0; background: none; color: var(--muted); }
+    .theme-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-height); width: 42px; padding: 0; border: 0; background: none; color: var(--muted); }
     .theme-toggle svg { width: 19px; height: 19px; }
     .theme-icon-sun { display: none; }
     html[data-theme="dark"] .theme-icon-moon { display: none; }
     html[data-theme="dark"] .theme-icon-sun { display: block; }
-    #meta { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    #meta { color: var(--muted); font-size: 12px; line-height: 1.5; white-space: nowrap; font-variant-numeric: tabular-nums; }
     .online-events { margin-bottom: 26px; }
     .event-status { display: flex; align-items: center; gap: 10px; }
     #onlineEventsStatus { margin: 0; font-size: 12px; color: var(--muted); }
@@ -76,28 +76,28 @@
     .online-events-content { display: grid; gap: 16px; min-width: 0; }
     .online-event-group { min-width: 0; }
     .online-event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; min-width: 0; }
-    .online-event-card { display: block; min-width: 0; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+    .online-event-card { display: flex; flex-direction: column; min-width: 0; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
     .online-event-card img { display: block; width: 100%; height: auto; border-radius: 5px; }
-    .online-event-body { padding: 9px 0 0; min-width: 0; }
-    .online-event-title { display: block; font-size: 13px; font-weight: 650; line-height: 1.5; }
+    .online-event-body { display: flex; flex-direction: column; flex: 1; padding: 10px 0 0; min-width: 0; }
+    .online-event-title { display: block; min-height: 42px; font-size: 14px; font-weight: 650; line-height: 1.5; }
     .online-event-card:hover .online-event-title { color: var(--accent); }
-    .online-event-date { display: block; margin-top: 5px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .online-event-date { display: block; padding-top: 6px; margin-top: auto; font-size: 12px; line-height: 1.5; color: var(--muted); font-variant-numeric: tabular-nums; }
     .toolbar { position: sticky; top: 0; z-index: 10; display: grid; grid-template-columns: minmax(200px, 1fr) auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); background: var(--bg); }
     .search-control { position: relative; min-width: 0; }
-    .search-icon { position: absolute; left: 12px; top: 12px; width: 17px; height: 17px; pointer-events: none; color: var(--muted); }
-    #searchInput { padding-left: 37px; padding-right: 38px; }
+    .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; pointer-events: none; color: var(--muted); }
+    #searchInput { padding-left: 40px; padding-right: 42px; }
     #searchInput::-webkit-search-cancel-button { -webkit-appearance: none; }
-    #searchClearButton { position: absolute; right: 3px; top: 3px; min-height: 34px; width: 34px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 21px; }
+    #searchClearButton { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; min-height: calc(var(--control-height) - 6px); width: calc(var(--control-height) - 6px); padding: 0; border: 0; background: none; color: var(--muted); font-size: 21px; line-height: 1; }
     #filterToggleButton { display: none; }
     .filter-controls { display: flex; align-items: center; gap: 14px; min-width: 0; }
     .price-range { width: 238px; margin: 0; padding: 0; border: 0; min-width: 0; flex-shrink: 0; }
     .price-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 7px; }
     .price-input { position: relative; }
     .price-input input { padding-right: 27px; font-variant-numeric: tabular-nums; }
-    .price-input span { position: absolute; right: 10px; top: 11px; color: var(--muted); font-size: 12px; pointer-events: none; }
+    .price-input span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; pointer-events: none; }
     .range-divider { color: var(--muted); }
     .check-group { display: flex; gap: 12px; }
-    .check-filter { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; min-height: 36px; white-space: nowrap; }
+    .check-filter { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; min-height: var(--control-height); white-space: nowrap; }
     .check-filter:has(input:checked) { color: var(--text); }
     .check-filter input { width: 14px; min-height: 14px; height: 14px; margin: 0; padding: 0; accent-color: var(--accent); }
     #resetButton { border: 0; color: var(--muted); padding: 0 4px; background: none; white-space: nowrap; }
@@ -108,44 +108,56 @@
     .spinner { width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
     table { width: 100%; border-collapse: collapse; }
-    .table-wrap > table > thead { position: sticky; top: var(--toolbar-height, 65px); z-index: 5; background: var(--bg); }
-    .table-wrap > table > thead th { background: var(--bg); }
+    .table-wrap > table { table-layout: fixed; }
+    .table-wrap > table > thead { position: sticky; top: var(--toolbar-height, 67px); z-index: 5; background: var(--bg); }
+    .table-wrap > table > thead th { height: var(--control-height); padding-top: 0; padding-bottom: 0; background: var(--bg); line-height: 1.5; }
+    .table-wrap > table > thead th:nth-child(2) { width: 88px; }
+    .table-wrap > table > thead th:nth-child(3) { width: 176px; }
+    .table-wrap > table > thead th:nth-child(4) { width: 108px; }
+    #rows > tr > td:not(:first-child) { vertical-align: top; }
     th, td { padding: 17px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
-    th { font-size: 11px; font-weight: 500; color: var(--muted); padding-top: 10px; padding-bottom: 10px; }
+    th { font-size: 12px; font-weight: 550; color: var(--muted); padding-top: 10px; padding-bottom: 10px; }
     th:first-child, td:first-child { padding-left: 0; }
     th:last-child, td:last-child { padding-right: 0; }
     tbody tr:hover { background: var(--hover); }
     .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .sort-button { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; border: 0; background: none; font: inherit; color: inherit; padding: 0; min-height: 24px; }
+    .sort-button { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; border: 0; background: none; font: inherit; color: inherit; padding: 0; min-height: var(--control-height); line-height: 1.5; vertical-align: top; }
     .sort-button:hover { background: none; color: var(--accent); }
     .sort-button::after { content: "↕"; color: var(--muted); }
     th[aria-sort="ascending"] .sort-button::after { content: "↑"; color: var(--accent); }
     th[aria-sort="descending"] .sort-button::after { content: "↓"; color: var(--accent); }
-    .product { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: center; gap: 15px; max-width: 510px; color: inherit; text-decoration: none; }
+    .product { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: start; gap: 15px; max-width: 510px; color: inherit; text-decoration: none; }
     .product:hover .name { color: var(--accent); }
     .thumb { width: 84px; height: 84px; object-fit: contain; background: #fff; border-radius: 4px; }
-    .thumb.missing { display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font-size: 9px; }
-    .name { font-size: 14px; line-height: 1.5; font-weight: 500; overflow-wrap: anywhere; }
-    .current-price { font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
-    .price-history-button { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; padding: 0; border: 0; background: none; color: inherit; min-height: 44px; }
+    .thumb.missing { display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font-size: 12px; }
+    .name { padding-top: 1px; font-size: 15px; line-height: var(--value-line-height); font-weight: 500; overflow-wrap: anywhere; }
+    .current-price { display: block; font-size: 18px; font-weight: 650; line-height: var(--value-line-height); letter-spacing: -.025em; }
+    .price-history-button { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; padding: 0; border: 0; background: none; color: inherit; min-height: var(--control-height); vertical-align: top; }
     .price-history-button:hover { background: none; color: var(--accent); }
     .price-sparkline { display: block; width: 100px; height: 24px; }
-    .history-link { display: block; font-size: 10px; color: var(--muted); }
-    .discount-value { font-size: 15px; font-weight: 600; color: var(--accent); }
+    .history-link { display: block; font-size: 12px; line-height: 1.5; color: var(--muted); }
+    .discount-value { display: block; font-size: 16px; font-weight: 600; line-height: var(--value-line-height); color: var(--accent); }
     .delta.up .discount-value { color: var(--bad); }
-    .price-age { font-size: 12px; color: var(--muted); }
+    .price-age { display: block; font-size: 12px; line-height: var(--value-line-height); color: var(--muted); }
+    #rows .price-age { padding-top: 2px; }
     .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: var(--backdrop); }
     .dialog { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(800px, 100%); max-height: calc(100dvh - 40px); overflow: hidden; border-radius: 10px; background: var(--surface); }
     .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 21px 22px; border-bottom: 1px solid var(--line); }
-    .dialog-title { margin: 0; font-size: 16px; font-weight: 650; line-height: 1.5; }
+    .dialog-head > div { min-width: 0; }
+    #historyCloseButton { flex-shrink: 0; }
+    .dialog-title { margin: 0; font-size: 17px; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
     .dialog-subtitle { margin-top: 5px; font-size: 12px; color: var(--muted); }
     .dialog-body { overflow: auto; padding: 20px 22px; }
     .history-controls { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
-    #historyRangeSelect { width: 100px; min-height: 36px; font-size: 12px; }
-    #historyPointSummary { min-width: 0; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    #historyRangeSelect { width: 108px; flex-shrink: 0; }
+    #historyPointSummary { min-width: 0; font-size: 13px; line-height: 1.5; color: var(--muted); font-variant-numeric: tabular-nums; }
     .history-chart { display: block; width: 100%; height: auto; touch-action: pan-y; }
-    .history-table { margin-top: 20px; font-size: 12px; }
-    .history-table th, .history-table td { padding: 12px 8px; }
+    .history-table { table-layout: fixed; margin-top: 20px; font-size: 13px; line-height: 1.5; }
+    .history-table th, .history-table td { padding: 12px 6px; }
+    .history-table th:first-child { width: 42%; }
+    .history-table th:nth-child(2) { width: 36%; }
+    .history-table th:nth-child(3) { width: 22%; }
+    .history-table td:first-child { white-space: normal; }
     .history-table th:first-child, .history-table td:first-child { padding-left: 0; }
     .history-table th:last-child, .history-table td:last-child { padding-right: 0; }
     #historyNote, #historyEmpty { font-size: 12px; color: var(--muted); }
@@ -153,59 +165,54 @@
     .empty p { margin: 0 0 15px; }
     #loadMoreButton { display: block; width: min(240px, 100%); margin: 20px auto 0; }
     @media (max-width: 900px) {
+      :root { --control-height: 44px; }
+      input, select { font-size: 16px; }
       .online-event-grid { display: flex; gap: 14px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
       .online-event-card { flex: 0 0 240px; scroll-snap-align: start; }
       .toolbar { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
-      #filterToggleButton { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 14px; }
+      #filterToggleButton { display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-height); padding: 0 14px; }
       #filterToggleButton[aria-expanded="true"] { color: var(--accent); border-color: var(--active-line); background: var(--active-bg); }
       .filter-controls { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: min(360px, 100%); padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: var(--popup-shadow); gap: 13px; }
       .toolbar:has(#filterToggleButton[aria-expanded="true"]) > .filter-controls { display: grid; }
       .filter-controls .price-range { width: 100%; }
       .filter-controls .check-group { flex-wrap: wrap; gap: 10px 16px; }
-      .filter-controls #resetButton { justify-self: end; min-height: 36px; }
+      .filter-controls #resetButton { justify-self: end; }
       .table-wrap > table, .table-wrap > table > tbody, .table-wrap > table > tbody > tr, .table-wrap > table > tbody > tr > td { display: block; }
       .table-wrap > table > thead { display: block; border-bottom: 1px solid var(--line); }
-      .table-wrap > table > thead > tr { display: grid; grid-template-columns: .6fr minmax(100px, 1fr) 1.2fr; gap: 10px; }
-      .table-wrap > table > thead th { padding: 7px 0; border: 0; }
+      .table-wrap > table > thead > tr { display: grid; grid-template-columns: var(--value-columns); gap: 8px; }
+      .table-wrap > table > thead th { width: auto; padding: 0; border: 0; }
+      .table-wrap > table > thead th:nth-child(n) { width: auto; }
       .table-wrap > table > thead th:first-child { display: none; }
       .table-wrap > table > thead th:nth-child(2) { text-align: left; }
       .table-wrap > table > thead th:nth-child(3) { text-align: center; }
       #rows { display: grid; grid-template-columns: 1fr; }
-      #rows > tr { display: grid; grid-template-columns: .6fr minmax(100px, 1fr) 1.2fr; gap: 13px 10px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+      #rows > tr { display: grid; grid-template-columns: var(--value-columns); gap: 12px 8px; padding: 18px 0; border-bottom: 1px solid var(--line); }
       #rows > tr > td { padding: 0; border: 0; }
       #rows > tr > td:first-child { grid-column: 1 / -1; }
-      #rows .product { grid-template-columns: 88px minmax(0, 1fr); gap: 14px; }
+      #rows .product { grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: 14px; }
+      #rows .name { padding-top: 0; line-height: 1.5; }
       #rows .thumb { width: 88px; height: 88px; }
-      #rows td[data-label="현재가"] { text-align: center; }
-      #rows td[data-label="할인율"] { text-align: left; }
-      #rows td[data-label="갱신일시"] { text-align: right; align-self: start; padding-top: 3px; }
+      #rows td[data-label="현재가"] { text-align: center; align-self: start; }
+      #rows td[data-label="할인율"] { text-align: left; align-self: start; }
+      #rows td[data-label="갱신일시"] { text-align: right; align-self: start; }
       .price-history-button { align-items: center; }
-      .current-price { font-size: 17px; }
-      .price-age { font-size: 11px; }
     }
     @media (max-width: 640px) {
       .shell { padding: 0 16px 26px; }
       .topbar { min-height: 58px; margin-bottom: 12px; gap: 8px; }
-      .theme-toggle { width: 32px; }
+      .refresh-button, .theme-toggle { width: 36px; }
       h1 { font-size: 16px; }
-      #meta { font-size: 10px; }
       .online-events { margin-bottom: 20px; }
       .online-event-card { flex-basis: 230px; }
-      .online-event-title { font-size: 12px; }
       .results-bar { padding-top: 12px; }
       #rows { grid-template-columns: 1fr; }
-      #rows > tr { padding: 16px 0; gap: 12px 10px; }
-      .current-price { font-size: 19px; }
-      .discount-value { font-size: 16px; }
-      .price-age { font-size: 12px; }
+      #rows > tr { padding: 16px 0; }
       .event-status { flex-wrap: wrap; }
       .modal { padding: 0; align-items: end; }
       .dialog { max-height: 90dvh; border-radius: 10px 10px 0 0; }
       .dialog-head { padding: 18px 16px; }
       .dialog-body { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
-      .history-controls { align-items: flex-start; }
-      .history-table { font-size: 11px; }
-      .history-table th, .history-table td { padding: 11px 5px; }
+      .history-table th, .history-table td { padding: 12px 6px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
@@ -233,7 +240,7 @@
       <section class="toolbar" id="productToolbar" aria-label="상품 검색과 필터">
         <div class="search-control">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-          <input id="searchInput" type="search" aria-label="상품명 또는 상품 코드 검색" placeholder="상품명 또는 코드 검색" autocomplete="off">
+          <input id="searchInput" type="search" aria-label="상품명 또는 상품 코드 검색" placeholder="상품명·코드 검색" autocomplete="off">
           <button id="searchClearButton" type="button" aria-label="검색어 지우기" hidden>×</button>
         </div>
         <button id="filterToggleButton" type="button" aria-expanded="false" aria-controls="filterControls">필터</button>
@@ -263,7 +270,7 @@
           <thead><tr><th scope="col">상품</th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="discountRate">할인율</button></th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="price">현재가</button></th><th scope="col" class="num"><button class="sort-button" type="button" data-sort-key="priceTimestamp">갱신일시</button></th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
-        <div class="empty" id="empty" hidden><p>조건에 맞는 상품이 없습니다.</p><button id="clearFiltersButton" type="button">모든 상품 보기</button></div>
+        <div class="empty" id="empty" hidden><p>조건에 맞는 상품이 없습니다.</p><button id="clearFiltersButton" type="button">검색 초기화</button></div>
       </div>
       <button id="loadMoreButton" type="button" hidden>더 보기</button>
     </section>
@@ -705,10 +712,13 @@
       if (historyCode) openHistory(historyCode);
       updateUrlState();
       setReadyStatus();
-      els.meta.textContent = new Intl.DateTimeFormat("ko-KR", {
+      const refreshParts = new Intl.DateTimeFormat("ko-KR", {
         timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false
-      }).format(state.loadedAt) + " 갱신";
+      }).formatToParts(state.loadedAt);
+      const refreshTime = Object.fromEntries(refreshParts.map(part => [part.type, part.value]));
+      els.meta.textContent = refreshTime.month + "/" + refreshTime.day + " " + refreshTime.hour + ":" + refreshTime.minute + " 갱신";
       els.meta.title = dateFormatter.format(state.loadedAt) + " (한국 시간)";
+      els.meta.setAttribute("aria-label", "마지막 갱신: " + els.meta.title);
     }
 
     function latestByCode(rows, valueKey) {
@@ -885,9 +895,17 @@
     function scheduleSearchFilter() {
       window.clearTimeout(searchFilterTimer);
       searchFilterTimer = window.setTimeout(() => {
-        state.visibleCount = LOAD_BATCH_SIZE;
-        applyFilters();
+        applySearchFilters();
       }, SEARCH_DEBOUNCE_MS);
+    }
+
+    function applySearchFilters() {
+      els.inStockOnlyInput.checked = true;
+      els.discountOnlyInput.checked = true;
+      if (!baseFilteredRows().length) els.discountOnlyInput.checked = false;
+      if (!baseFilteredRows().length) els.inStockOnlyInput.checked = false;
+      state.visibleCount = LOAD_BATCH_SIZE;
+      return applyFilters();
     }
 
     function defaultSortDir(key) {
@@ -1012,6 +1030,48 @@
       return { records, segments, pointCount, omittedTimestampCount, unknownPriceCount, domain };
     }
 
+    function prepareCurrentPriceHistory(history = [], row = {}, { from = -Infinity, to = Date.now() } = {}) {
+      const lowerBound = from instanceof Date ? from.getTime() : from;
+      const upperBound = to instanceof Date ? to.getTime() : to;
+      const actual = preparePriceHistory(history, { from: lowerBound, to: upperBound });
+      const result = { ...actual, extension: null };
+
+      const price = row?.price;
+      const timestamp = row?.priceTimestamp;
+      const currentTime = timestamp == null || timestamp === ""
+        ? NaN
+        : timestamp instanceof Date ? timestamp.getTime() : new Date(timestamp).getTime();
+      if (typeof price !== "number" || !Number.isFinite(price) || price < 0 ||
+          !Number.isFinite(currentTime) || !Number.isFinite(upperBound) ||
+          currentTime >= upperBound || actual.omittedTimestampCount > 0) {
+        return result;
+      }
+
+      // Look before the visible range as well: an unchanged known price can still
+      // carry into a selected period that contains no newly recorded observations.
+      const complete = preparePriceHistory(history, { to: upperBound });
+      const terminal = complete.records[complete.records.length - 1];
+      if (!terminal || terminal.price === null || terminal.price !== price || terminal.time !== currentTime) {
+        return result;
+      }
+
+      const start = Math.max(lowerBound, terminal.time);
+      if (!Number.isFinite(start) || start >= upperBound) return result;
+      const minimum = Math.min(actual.domain?.minimum ?? price, price);
+      const maximum = Math.max(actual.domain?.maximum ?? price, price);
+      const padding = Math.max((maximum - minimum) * 0.1, maximum * 0.025, 1);
+      result.domain = {
+        start: actual.domain?.start ?? start,
+        end: upperBound,
+        minimum,
+        maximum,
+        yMinimum: Math.max(0, minimum - padding),
+        yMaximum: maximum + padding
+      };
+      result.extension = { from: start, to: upperBound, price };
+      return result;
+    }
+
     function relativeTime(timestamp) {
       if (!timestamp || !Number.isFinite(timestamp.getTime())) return "-";
       const minutes = Math.floor(Math.max(0, Date.now() - timestamp.getTime()) / 60000);
@@ -1055,13 +1115,23 @@
       }).join("");
     }
 
+    function graphCurrentPrice(series, geometry, mini = false) {
+      if (!series.extension) return "";
+      const extension = series.extension;
+      const y = geometry.y(extension.price);
+      const title = "현재 · " + money(extension.price) + ". 마지막 확인 가격을 현재 시점까지 이어 표시했습니다.";
+      return '<path class="current-price-extension" d="M ' + geometry.x(extension.from) + ' ' + y + ' H ' + geometry.x(extension.to) + '" fill="none" stroke="currentColor" stroke-width="1.8" vector-effect="non-scaling-stroke"><title>' + escapeHtml(title) + '</title></path><circle data-current-price="' + extension.price + '" data-current-timestamp="' + extension.to + '" cx="' + geometry.x(extension.to) + '" cy="' + y + '" r="' + (mini ? '2' : '4') + '" fill="currentColor"><title>' + escapeHtml(title) + '</title></circle>';
+    }
+
     function renderSparkline(row) {
       const records = row.priceSeries.records.slice(-30);
-      const series = preparePriceHistory(records.map(point => ({ timestamp: new Date(point.time), value: point.price })));
+      const now = Date.now();
+      const from = records.length ? Math.min(records[0].time, now) : -Infinity;
+      const series = prepareCurrentPriceHistory(state.priceHistory.get(row.code) || [], row, { from, to: now });
       if (!series.domain) return '<svg class="price-sparkline" viewBox="0 0 100 24" aria-hidden="true"><path d="M 2 12 H 98" stroke="var(--line)" stroke-dasharray="3 3"/></svg>';
       const geometry = graphGeometry(series, 100, 24, { left: 3, right: 3, top: 2, bottom: 2 });
       const points = series.segments.flat();
-      return '<svg class="price-sparkline" viewBox="0 0 100 24" aria-hidden="true" style="color:var(--accent)">' + graphLines(series, geometry) + points.map(point => '<circle cx="' + geometry.x(point.time) + '" cy="' + geometry.y(point.price) + '" r="1.8" fill="currentColor"/>').join("") + '</svg>';
+      return '<svg class="price-sparkline" viewBox="0 0 100 24" aria-hidden="true" style="color:var(--accent)">' + graphLines(series, geometry) + points.map(point => '<circle cx="' + geometry.x(point.time) + '" cy="' + geometry.y(point.price) + '" r="1.8" fill="currentColor"/>').join("") + graphCurrentPrice(series, geometry, true) + '</svg>';
     }
 
     function historicalDiscountRates(code, records) {
@@ -1084,7 +1154,8 @@
       const row = state.rows.find(item => item.code === state.historyCode);
       if (!row) return;
       const days = Number(els.historyRangeSelect.value);
-      const series = preparePriceHistory(state.priceHistory.get(row.code) || [], { from: days ? Date.now() - days * 86400000 : -Infinity });
+      const now = Date.now();
+      const series = prepareCurrentPriceHistory(state.priceHistory.get(row.code) || [], row, { from: days ? now - days * 86400000 : -Infinity, to: now });
       els.historyTitle.textContent = row.name;
       els.historyEmpty.hidden = series.pointCount !== 0;
       els.historyPointSummary.textContent = series.pointCount ? numberFormatter.format(series.pointCount) + "개 기록" : "기록 없음";
@@ -1099,23 +1170,25 @@
         els.historyChart.innerHTML = '<p class="price-age">표시할 가격 기록이 없습니다.</p>';
         return;
       }
-      const width = window.matchMedia("(max-width: 640px)").matches ? 360 : 720;
-      const height = width === 360 ? 220 : 260;
-      const geometry = graphGeometry(series, width, height, { left: 80, right: 18, top: 18, bottom: 32 });
+      const width = Math.min(720, els.historyChart.clientWidth || window.innerWidth - 32);
+      const height = width <= 480 ? 220 : 260;
       const domain = series.domain;
+      const left = Math.max(80, Math.max(money(domain.minimum).length, money(domain.maximum).length) * 7.5 + 18);
+      const geometry = graphGeometry(series, width, height, { left, right: 18, top: 18, bottom: 32 });
       const points = series.segments.flat();
       const year = time => new Intl.DateTimeFormat("en", { timeZone: "Asia/Seoul", year: "numeric" }).format(new Date(time));
-      const dateLabel = time => new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", ...(year(domain.start) !== year(domain.end) ? { year: "numeric" } : {}), month: "numeric", day: "numeric" }).format(new Date(time));
+      const dateLabel = time => new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", ...(year(domain.start) !== year(domain.end) ? { year: "2-digit" } : {}), month: "numeric", day: "numeric" }).format(new Date(time));
       const levels = domain.minimum === domain.maximum ? [domain.minimum] : [domain.minimum, domain.maximum];
-      const axes = levels.map(price => '<line x1="80" x2="' + (width - 18) + '" y1="' + geometry.y(price) + '" y2="' + geometry.y(price) + '" stroke="var(--line)"/><text x="70" y="' + (geometry.y(price) + 4) + '" text-anchor="end" fill="var(--muted)" font-size="12">' + money(price) + '</text>').join("");
+      const axes = levels.map(price => '<line x1="' + left + '" x2="' + (width - 18) + '" y1="' + geometry.y(price) + '" y2="' + geometry.y(price) + '" stroke="var(--line)"/><text x="' + (left - 10) + '" y="' + (geometry.y(price) + 4) + '" text-anchor="end" fill="var(--muted)" font-size="13">' + money(price) + '</text>').join("");
       const dateLabels = domain.start === domain.end
-        ? '<text x="' + width / 2 + '" y="' + (height - 10) + '" text-anchor="middle" fill="var(--muted)" font-size="12">' + dateLabel(domain.start) + '</text>'
-        : '<text x="80" y="' + (height - 10) + '" fill="var(--muted)" font-size="12">' + dateLabel(domain.start) + '</text><text x="' + (width - 18) + '" y="' + (height - 10) + '" text-anchor="end" fill="var(--muted)" font-size="12">' + dateLabel(domain.end) + '</text>';
-      els.historyChart.innerHTML = '<svg class="history-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" tabindex="0" aria-label="' + escapeAttribute(row.name + " 가격 그래프. 좌우 방향키로 기록을 확인할 수 있습니다. 아래 표에서도 모든 기록을 볼 수 있습니다.") + '" style="color:var(--accent)">' + axes + dateLabels + graphLines(series, geometry) + points.map(point => '<circle data-price="' + point.price + '" data-timestamp="' + point.time + '" cx="' + geometry.x(point.time) + '" cy="' + geometry.y(point.price) + '" r="3.5" fill="currentColor"><title>' + escapeHtml(dateFormatter.format(new Date(point.time)) + " · " + money(point.price)) + '</title></circle>').join("") + '</svg>';
+        ? '<text x="' + width / 2 + '" y="' + (height - 10) + '" text-anchor="middle" fill="var(--muted)" font-size="13">' + dateLabel(domain.start) + '</text>'
+        : '<text x="' + left + '" y="' + (height - 10) + '" fill="var(--muted)" font-size="13">' + dateLabel(domain.start) + '</text><text x="' + (width - 18) + '" y="' + (height - 10) + '" text-anchor="end" fill="var(--muted)" font-size="13">' + (series.extension ? "현재" : dateLabel(domain.end)) + '</text>';
+      els.historyChart.innerHTML = '<svg class="history-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" tabindex="0" aria-label="' + escapeAttribute(row.name + " 가격 그래프. 마지막 확인 가격을 현재 시점까지 이어 표시합니다. 좌우 방향키로 기록을 확인할 수 있습니다. 아래 표에서도 모든 기록을 볼 수 있습니다.") + '" style="color:var(--accent)">' + axes + dateLabels + graphLines(series, geometry) + points.map(point => '<circle data-price="' + point.price + '" data-timestamp="' + point.time + '" cx="' + geometry.x(point.time) + '" cy="' + geometry.y(point.price) + '" r="3.5" fill="currentColor"><title>' + escapeHtml(dateFormatter.format(new Date(point.time)) + " · " + money(point.price)) + '</title></circle>').join("") + graphCurrentPrice(series, geometry) + '</svg>';
       const svg = els.historyChart.querySelector("svg");
-      const circles = [...svg.querySelectorAll("circle")];
+      const circles = [...svg.querySelectorAll("[data-price]")];
       let selected = points.length - 1;
       function selectPoint(index) {
+        if (!points.length) return;
         selected = Math.max(0, Math.min(points.length - 1, index));
         const point = points[selected];
         els.historyPointSummary.textContent = dateFormatter.format(new Date(point.time)) + " · " + money(point.price);
@@ -1124,6 +1197,11 @@
       svg.addEventListener("pointermove", event => {
         const box = svg.getBoundingClientRect();
         const x = (event.clientX - box.left) / box.width * width;
+        if (series.extension && x > (geometry.x(series.extension.from) + geometry.x(series.extension.to)) / 2) {
+          els.historyPointSummary.textContent = "현재 · " + money(series.extension.price);
+          circles.forEach(circle => circle.setAttribute("r", "3.5"));
+          return;
+        }
         let closest = 0;
         for (let i = 1; i < points.length; i++) if (Math.abs(geometry.x(points[i].time) - x) < Math.abs(geometry.x(points[closest].time) - x)) closest = i;
         selectPoint(closest);
@@ -1145,8 +1223,8 @@
         els.historyRangeSelect.value = "all";
       }
       state.historyCode = code;
-      renderHistory();
       els.historyModal.hidden = false;
+      renderHistory();
       document.querySelector("main").inert = true;
       document.body.style.overflow = "hidden";
       els.historyCloseButton.focus();
@@ -1388,7 +1466,7 @@
       state.sortKey = "";
       state.sortDir = "";
       state.visibleCount = LOAD_BATCH_SIZE;
-      applyFilters();
+      applySearchFilters();
     }
 
     function restoreStateFromUrl() {
@@ -1446,18 +1524,14 @@
     els.searchClearButton.addEventListener("click", () => {
       window.clearTimeout(searchFilterTimer);
       els.searchInput.value = "";
-      state.visibleCount = LOAD_BATCH_SIZE;
-      applyFilters();
+      applySearchFilters();
       els.searchInput.focus();
     });
     els.clearFiltersButton.addEventListener("click", () => {
       window.clearTimeout(searchFilterTimer);
       els.searchInput.value = "";
-      els.inStockOnlyInput.checked = false;
-      els.discountOnlyInput.checked = false;
       setDefaultPriceRange();
-      state.visibleCount = LOAD_BATCH_SIZE;
-      applyFilters();
+      applySearchFilters();
       els.searchInput.focus();
     });
     els.loadMoreButton.addEventListener("click", loadMoreRows);
@@ -1519,6 +1593,14 @@
     new ResizeObserver(entries => {
       document.documentElement.style.setProperty("--toolbar-height", entries[0].target.getBoundingClientRect().height + "px");
     }).observe(els.productToolbar);
+    let historyChartWidth = 0;
+    new ResizeObserver(entries => {
+      const width = entries[0].contentRect.width;
+      if (width > 0 && Math.abs(width - historyChartWidth) > 1) {
+        historyChartWidth = width;
+        if (!els.historyModal.hidden) renderHistory();
+      }
+    }).observe(els.historyChart);
 
     async function init() {
       await ensureServiceWorker();
