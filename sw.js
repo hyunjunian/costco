@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "costco-price-pwa-v3";
+const CACHE_NAME = "costco-price-pwa-v4";
 const DB_NAME = "costco-price-alerts";
 const DB_VERSION = 1;
 const DB_STORE = "kv";
@@ -44,6 +44,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  // External APIs must surface network/CORS failures instead of receiving HTML.
+  if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {
